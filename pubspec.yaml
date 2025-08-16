@@ -1,0 +1,20 @@
+name: vedem
+description: "O aplicatie simpla, complet locala, in flutter folosind clean architecture cu bloc, in care poti adauga taskuri cu diamante in fiecare zi si poti pune o poza drept daily highlight."
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
