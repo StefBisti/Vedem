@@ -1,12 +1,11 @@
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
 import 'package:vedem/features/tasks/data/models/task_model.dart';
-import 'package:sqflite/sqflite.dart';
 
 class LocalTaskDataSource implements TaskDataSource {
-  final Database db;
   @override
   Future<void> addNewDayTaskConnection(String dayId, int taskId, int done) {
-    
+    // TODO: implement addNewGenericTask
+    throw UnimplementedError();
   }
 
   @override
