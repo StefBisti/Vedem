@@ -66,3 +66,6 @@ macos/Flutter/ephemeral/
 # Hive / app data (just in case)
 **/hive_boxes/
 *.box
+
+# Secrets
+/lib/core/secrets/
