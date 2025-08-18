@@ -4,7 +4,7 @@ class ServerException implements Exception {
   const ServerException({required this.message});
 }
 
-class CacheException implements Exception {
+class LocalDatabaseException implements Exception {
   final String message;
-  const CacheException({required this.message});
+  const LocalDatabaseException({required this.message});
 }
