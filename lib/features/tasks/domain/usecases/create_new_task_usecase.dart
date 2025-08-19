@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
@@ -14,7 +15,7 @@ class CreateNewTaskUsecase
   Future<Either<Failure, TaskEntity>> call(
     CreateNewTaskUsecaseParams params,
   ) async {
-    return await taskRepository.createNewTask(
+    return await taskRepository.createNewTaskAndAssignToDay(
       params.dayId,
       params.categoryId,
       params.content,
@@ -24,7 +25,7 @@ class CreateNewTaskUsecase
   }
 }
 
-class CreateNewTaskUsecaseParams {
+class CreateNewTaskUsecaseParams extends Equatable {
   final String dayId;
   final int categoryId;
   final String content;
@@ -38,4 +39,13 @@ class CreateNewTaskUsecaseParams {
     required this.isRecurring,
     required this.diamonds,
   });
+
+  @override
+  List<Object?> get props => [
+    dayId,
+    categoryId,
+    content,
+    isRecurring,
+    diamonds,
+  ];
 }

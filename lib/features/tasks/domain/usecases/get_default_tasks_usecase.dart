@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
@@ -14,12 +15,15 @@ class GetDefaultTasksUsecase
   Future<Either<Failure, List<TaskEntity>>> call(
     GetDefaultTasksUsecaseParams params,
   ) async {
-    return await taskRepository.getDefaultTasks(params.dayId);
+    return await taskRepository.getDefaultTasksNotAssignedToDay(params.dayId);
   }
 }
 
-class GetDefaultTasksUsecaseParams {
+class GetDefaultTasksUsecaseParams extends Equatable {
   final String dayId;
 
   const GetDefaultTasksUsecaseParams({required this.dayId});
+  
+  @override
+  List<Object?> get props => [dayId];
 }
