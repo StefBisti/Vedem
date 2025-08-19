@@ -1,22 +1,22 @@
 import 'package:equatable/equatable.dart';
 
 class TaskEntity extends Equatable {
-  final int id;
+  final int taskId;
   final int categoryId;
   final String content;
   final bool isRecurring;
   final int diamonds;
-  final bool isCompleted;
+  final bool isDone;
 
   const TaskEntity({
-    required this.id,
+    required this.taskId,
     required this.categoryId,
     required this.content,
     required this.isRecurring,
     required this.diamonds,
-    required this.isCompleted,
+    required this.isDone,
   });
 
   @override
-  List<Object?> get props => [id, categoryId, content, diamonds, isRecurring, isCompleted];
+  List<Object?> get props => [taskId, categoryId, content, diamonds, isRecurring, isDone];
 }

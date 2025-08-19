@@ -1,7 +1,7 @@
 import 'package:vedem/features/tasks/data/models/task_model.dart';
 
 abstract interface class TaskDataSource {
-  Future<void> addNewGenericTask(
+  Future<TaskModel> addNewGenericTask(
     int categoryId,
     String content,
     bool isRecurring,
@@ -12,13 +12,9 @@ abstract interface class TaskDataSource {
 
   Future<List<TaskModel>> readTasksForDay(String dayId);
 
-  Future<void> updateGenericTask(
-    int taskId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
-  );
+  Future<List<TaskModel>> getDefaultTasks(String dayId);
+
+  Future<void> updateGenericTask(TaskModel newTask);
 
   Future<void> updateDayTaskConnection(String dayId, int taskId, int done);
 
