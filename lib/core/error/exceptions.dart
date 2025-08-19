@@ -1,10 +1,9 @@
+import 'package:equatable/equatable.dart';
 
-class ServerException implements Exception {
-  final String message;
-  const ServerException({required this.message});
-}
-
-class LocalDatabaseException implements Exception {
+class LocalDatabaseException extends Equatable implements Exception {
   final String message;
   const LocalDatabaseException({required this.message});
+  
+  @override
+  List<Object?> get props => [message];
 }
