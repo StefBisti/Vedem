@@ -93,10 +93,10 @@ void main() {
   );
 
   test('readTasksForDay returns mapped TaskModel list', () async {
-    when(() => db.rawQuery(any())).thenAnswer((_) async => [sampleRow]);
+    when(() => db.rawQuery(any(), any())).thenAnswer((_) async => [sampleRow]);
     final list = await dataSource.readTasksForDay(sampleDay);
     expect(list[0], sampleTaskModel);
-    verify(() => db.rawQuery(any())).called(1);
+    verify(() => db.rawQuery(any(), any())).called(1);
   });
   test('readTasksForDay throws LocalDatabaseException on DB error', () async {
     when(
@@ -106,7 +106,7 @@ void main() {
       () => dataSource.readTasksForDay(sampleDay),
       throwsA(LocalDatabaseException(message: readTasksError)),
     );
-    verify(() => db.rawQuery(any())).called(1);
+    verify(() => db.rawQuery(any(), any())).called(1);
   });
 
   test('getDefaultTasks returns recurring tasks list', () async {
