@@ -18,5 +18,12 @@ class TaskEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [taskId, categoryId, content, diamonds, isRecurring, isDone];
+  List<Object?> get props => [
+    taskId,
+    categoryId,
+    content,
+    diamonds,
+    isRecurring,
+    isDone,
+  ];
 }

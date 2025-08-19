@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
@@ -18,8 +19,11 @@ class ReadTasksForDayUsecase
   }
 }
 
-class ReadTasksForDayUsecaseParams {
+class ReadTasksForDayUsecaseParams extends Equatable {
   final String dayId;
 
   const ReadTasksForDayUsecaseParams({required this.dayId});
+  
+  @override
+  List<Object?> get props => [dayId];
 }

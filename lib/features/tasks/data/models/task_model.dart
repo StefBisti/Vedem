@@ -8,7 +8,7 @@ class TaskModel extends TaskEntity {
     required super.content,
     required super.isRecurring,
     required super.diamonds,
-    required super.isDone
+    required super.isDone,
   });
 
   TaskModel copyWith({
@@ -31,12 +31,12 @@ class TaskModel extends TaskEntity {
 
   factory TaskModel.fromMap(Map<String, dynamic> map) {
     return TaskModel(
-      taskId: map[taskIdKey] as int,
-      categoryId: map[taskCategoryIdKey] as int,
-      content: map[taskContentKey] as String,
-      isRecurring: (map[taskIsRecurringKey] as int) == 1,
-      diamonds: map[taskDiamondsKey] as int,
-      isDone: map.containsKey(dayTaskDoneKey) ? (map[dayTaskDoneKey] as int) == 1 : false,
+      taskId: (map[TasksTableKeys.taskIdKey] ?? 0) as int,
+      categoryId: (map[TasksTableKeys.taskCategoryIdKey] ?? 0) as int,
+      content: (map[TasksTableKeys.taskContentKey] ?? '') as String,
+      isRecurring: ((map[TasksTableKeys.taskIsRecurringKey] ?? 0) as int) == 1,
+      diamonds: (map[TasksTableKeys.taskDiamondsKey] ?? 0) as int,
+      isDone: ((map[DayTasksTableKeys.dayTaskDoneKey] ?? 0) as int) == 1,
     );
   }
 }

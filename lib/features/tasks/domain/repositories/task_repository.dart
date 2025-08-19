@@ -1,11 +1,10 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/failures.dart';
-import 'package:vedem/core/error/success.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 
 abstract interface class TaskRepository {
-  /// returns either created empty TaskEntity if success or failure
-  Future<Either<Failure, TaskEntity>> createNewTask(
+  /// returns the created TaskEntity with taskId and assignes to to day
+  Future<Either<Failure, TaskEntity>> createNewTaskAndAssignToDay(
     String dayId,
     int categoryId,
     String content,
@@ -13,23 +12,25 @@ abstract interface class TaskRepository {
     int diamonds,
   );
 
-  /// returns either a list of complete TaskEntities based on a dayId or failure <br>
-  /// dayId is of type 'YYYY-MM-DD'
+  /// assigns an existing task to a day
+  Future<Either<Failure, Unit>> assignTaskToDay(String dayId, int taskId);
+
+  /// returns either a list of TaskEntities with ids assigned to a day
   Future<Either<Failure, List<TaskEntity>>> readTasksForDay(String dayId);
 
-  /// updates and returns a task based on its id, or a failure
-  Future<Either<Failure, Success>> updateTask(TaskEntity newTask);
+  /// updates a task based on its id
+  Future<Either<Failure, Unit>> updateTask(TaskEntity newTask);
 
-  /// sets a task as completed or not in day task table and returns complete TaskEntity or returns failure
-  Future<Either<Failure, Success>> setTask(
+  /// sets a task as completed or not in dayTask table
+  Future<Either<Failure, Unit>> setTask(
     String dayId,
     int taskId,
     bool completed,
   );
 
-  /// deletes from day task table and return the tasks or a failure <br>
-  Future<Either<Failure, Success>> deleteTask(String dayId, int taskId);
+  /// deletes from dayTask table the task with taskId assigned to the day with dayId
+  Future<Either<Failure, Unit>> deleteTask(String dayId, int taskId);
 
-  /// gets recurring tasks or a failure
-  Future<Either<Failure, List<TaskEntity>>> getDefaultTasks(String dayId);
+  /// gets recurring tasks or second chance tasks for a day
+  Future<Either<Failure, List<TaskEntity>>> getDefaultTasksNotAssignedToDay(String dayId);
 }

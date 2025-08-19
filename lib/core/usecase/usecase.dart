@@ -1,8 +1,9 @@
 import 'package:vedem/core/error/failures.dart';
 import 'package:fpdart/fpdart.dart';
 
-abstract interface class UseCase<ReturnType, Params> {
-  Future<Either<Failure, ReturnType>> call(Params params);
+/// Implementations should never throw; return Left(Failure) instead.
+abstract interface class UseCase<R, P> {
+  Future<Either<Failure, R>> call(P params);
 }
 
 class NoParams {

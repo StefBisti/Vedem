@@ -1,7 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/exceptions.dart';
 import 'package:vedem/core/error/failures.dart';
-import 'package:vedem/core/error/success.dart';
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
 import 'package:vedem/features/tasks/data/models/task_model.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
@@ -13,7 +12,7 @@ class TaskRepositoryImpl implements TaskRepository {
   const TaskRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, TaskEntity>> createNewTask(
+  Future<Either<Failure, TaskEntity>> createNewTaskAndAssignToDay(
     String dayId,
     int categoryId,
     String content,
@@ -21,14 +20,28 @@ class TaskRepositoryImpl implements TaskRepository {
     int diamonds,
   ) async {
     try {
-      TaskModel newTask = await localDataSource.addNewGenericTask(
+      TaskModel newTask = await localDataSource.addNewTaskAndAssignToDay(
+        dayId,
         categoryId,
         content,
         isRecurring,
         diamonds,
       );
-      await localDataSource.addNewDayTaskConnection(dayId, newTask.taskId, 0);
       return right(newTask);
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> assignTaskToDay(String dayId, int taskId) async {
+    try {
+      await localDataSource.addNewDayTaskConnection(
+        dayId,
+        taskId,
+        false,
+      );
+      return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
@@ -49,7 +62,7 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, Success>> updateTask(TaskEntity newTask) async {
+  Future<Either<Failure, Unit>> updateTask(TaskEntity newTask) async {
     try {
       await localDataSource.updateGenericTask(
         TaskModel(
@@ -61,46 +74,44 @@ class TaskRepositoryImpl implements TaskRepository {
           isDone: newTask.isDone,
         ),
       );
-      return right(LocalDatabaseSuccess());
+      return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, Success>> setTask(
+  Future<Either<Failure, Unit>> setTask(
     String dayId,
     int taskId,
     bool done,
   ) async {
     try {
-      await localDataSource.updateDayTaskConnection(
-        dayId,
-        taskId,
-        done ? 1 : 0,
-      );
-      return right(LocalDatabaseSuccess());
+      await localDataSource.updateDayTaskConnection(dayId, taskId, done);
+      return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, Success>> deleteTask(String dayId, int taskId) async {
+  Future<Either<Failure, Unit>> deleteTask(String dayId, int taskId) async {
     try {
       await localDataSource.deleteDayTaskConnection(dayId, taskId);
-      return right(LocalDatabaseSuccess());
+      return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> getDefaultTasks(
+  Future<Either<Failure, List<TaskEntity>>> getDefaultTasksNotAssignedToDay(
     String dayId,
   ) async {
     try {
-      final List<TaskModel> result = await localDataSource.getDefaultTasks(dayId);
+      final List<TaskModel> result = await localDataSource.getDefaultTasksNotAssignedToDay(
+        dayId,
+      );
       return right(result);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
