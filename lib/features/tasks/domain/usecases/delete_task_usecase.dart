@@ -31,5 +31,5 @@ class DeleteTaskUseCaseParams extends Equatable {
   });
 
   @override
-  List<Object?> get props => [dayId, taskId];
+  List<Object?> get props => [dayId ?? '', taskId, isRecurring];
 }

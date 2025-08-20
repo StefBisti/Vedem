@@ -6,7 +6,7 @@ abstract class TasksState extends Equatable {
   List<Object> get props => [];
 }
 
-class TasksInitialState extends TasksState {}
+class TasksEmptyState extends TasksState {}
 
 class TasksLoadingState extends TasksState {}
 

@@ -15,6 +15,7 @@ class CreateNewTaskUseCase
   Future<Either<Failure, TaskEntity>> call(
     CreateNewTaskUseCaseParams params,
   ) async {
+    // check if data is right
     return await taskRepository.createNewTaskAndAssignToDay(
       params.dayId,
       params.categoryId,
