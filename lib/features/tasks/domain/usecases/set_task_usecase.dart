@@ -4,13 +4,13 @@ import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
 import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
 
-class SetTaskUsecase implements UseCase<Unit, SetTaskUsecaseParams> {
+class SetTaskUseCase implements UseCase<Unit, SetTaskUseCaseParams> {
   final TaskRepository taskRepository;
 
-  const SetTaskUsecase({required this.taskRepository});
+  const SetTaskUseCase({required this.taskRepository});
 
   @override
-  Future<Either<Failure, Unit>> call(SetTaskUsecaseParams params) async {
+  Future<Either<Failure, Unit>> call(SetTaskUseCaseParams params) async {
     return await taskRepository.setTask(
       params.dayId,
       params.taskId,
@@ -19,12 +19,12 @@ class SetTaskUsecase implements UseCase<Unit, SetTaskUsecaseParams> {
   }
 }
 
-class SetTaskUsecaseParams extends Equatable {
+class SetTaskUseCaseParams extends Equatable {
   final String dayId;
   final int taskId;
   final bool completed;
 
-  const SetTaskUsecaseParams({
+  const SetTaskUseCaseParams({
     required this.dayId,
     required this.taskId,
     required this.completed,

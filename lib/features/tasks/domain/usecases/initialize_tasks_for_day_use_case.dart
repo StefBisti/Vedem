@@ -5,24 +5,24 @@ import 'package:vedem/core/usecase/usecase.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
 
-class GetDefaultTasksUsecase
-    implements UseCase<List<TaskEntity>, GetDefaultTasksUsecaseParams> {
+class InitializeTasksForDayUseCase
+    implements UseCase<List<TaskEntity>, InitializeTasksForDayUseCaseParams> {
   final TaskRepository taskRepository;
 
-  const GetDefaultTasksUsecase({required this.taskRepository});
+  const InitializeTasksForDayUseCase({required this.taskRepository});
 
   @override
   Future<Either<Failure, List<TaskEntity>>> call(
-    GetDefaultTasksUsecaseParams params,
+    InitializeTasksForDayUseCaseParams params,
   ) async {
     return await taskRepository.getDefaultTasksNotAssignedToDay(params.dayId);
   }
 }
 
-class GetDefaultTasksUsecaseParams extends Equatable {
+class InitializeTasksForDayUseCaseParams extends Equatable {
   final String dayId;
 
-  const GetDefaultTasksUsecaseParams({required this.dayId});
+  const InitializeTasksForDayUseCaseParams({required this.dayId});
   
   @override
   List<Object?> get props => [dayId];

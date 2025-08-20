@@ -2,25 +2,46 @@ import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
-import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
 
-class UpdateTaskUsecase implements UseCase<Unit, UpdateTaskUsecaseParams> {
+class UpdateTaskUseCase implements UseCase<Unit, UpdateTaskUseCaseParams> {
   final TaskRepository taskRepository;
 
-  const UpdateTaskUsecase({required this.taskRepository});
+  const UpdateTaskUseCase({required this.taskRepository});
 
   @override
-  Future<Either<Failure, Unit>> call(UpdateTaskUsecaseParams params) async {
-    return await taskRepository.updateTask(params.newTask);
+  Future<Either<Failure, Unit>> call(UpdateTaskUseCaseParams params) async {
+    return await taskRepository.updateTask(
+      params.taskId,
+      params.categoryId,
+      params.content,
+      params.isRecurring,
+      params.diamonds,
+    );
   }
 }
 
-class UpdateTaskUsecaseParams extends Equatable {
-  final TaskEntity newTask;
+class UpdateTaskUseCaseParams extends Equatable {
+  final int taskId;
+  final int categoryId;
+  final String content;
+  final bool isRecurring;
+  final int diamonds;
 
-  const UpdateTaskUsecaseParams({required this.newTask});
+  const UpdateTaskUseCaseParams({
+    required this.taskId,
+    required this.categoryId,
+    required this.content,
+    required this.isRecurring,
+    required this.diamonds,
+  });
 
   @override
-  List<Object?> get props => [newTask];
+  List<Object?> get props => [
+    taskId,
+    categoryId,
+    content,
+    isRecurring,
+    diamonds,
+  ];
 }

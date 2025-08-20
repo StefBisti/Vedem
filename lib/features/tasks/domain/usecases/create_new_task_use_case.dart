@@ -5,15 +5,15 @@ import 'package:vedem/core/usecase/usecase.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
 
-class CreateNewTaskUsecase
-    implements UseCase<TaskEntity, CreateNewTaskUsecaseParams> {
+class CreateNewTaskUseCase
+    implements UseCase<TaskEntity, CreateNewTaskUseCaseParams> {
   final TaskRepository taskRepository;
 
-  const CreateNewTaskUsecase({required this.taskRepository});
+  const CreateNewTaskUseCase({required this.taskRepository});
 
   @override
   Future<Either<Failure, TaskEntity>> call(
-    CreateNewTaskUsecaseParams params,
+    CreateNewTaskUseCaseParams params,
   ) async {
     return await taskRepository.createNewTaskAndAssignToDay(
       params.dayId,
@@ -25,14 +25,14 @@ class CreateNewTaskUsecase
   }
 }
 
-class CreateNewTaskUsecaseParams extends Equatable {
+class CreateNewTaskUseCaseParams extends Equatable {
   final String dayId;
   final int categoryId;
   final String content;
   final bool isRecurring;
   final int diamonds;
 
-  const CreateNewTaskUsecaseParams({
+  const CreateNewTaskUseCaseParams({
     required this.dayId,
     required this.categoryId,
     required this.content,

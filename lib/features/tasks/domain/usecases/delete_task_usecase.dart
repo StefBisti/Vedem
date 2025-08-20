@@ -4,26 +4,32 @@ import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/core/usecase/usecase.dart';
 import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
 
-class DeleteTaskUsecase
-    implements UseCase<Unit, DeleteTaskUsecaseParams> {
+class DeleteTaskUseCase implements UseCase<Unit, DeleteTaskUseCaseParams> {
   final TaskRepository taskRepository;
 
-  const DeleteTaskUsecase({required this.taskRepository});
-  
+  const DeleteTaskUseCase({required this.taskRepository});
+
   @override
-  Future<Either<Failure, Unit>> call(
-    DeleteTaskUsecaseParams params,
-  ) async {
-    return await taskRepository.deleteTask(params.dayId, params.taskId);
+  Future<Either<Failure, Unit>> call(DeleteTaskUseCaseParams params) async {
+    return await taskRepository.deleteTask(
+      params.dayId,
+      params.taskId,
+      params.isRecurring,
+    );
   }
 }
 
-class DeleteTaskUsecaseParams extends Equatable {
-  final String dayId;
+class DeleteTaskUseCaseParams extends Equatable {
+  final String? dayId;
   final int taskId;
+  final bool isRecurring;
 
-  const DeleteTaskUsecaseParams({required this.dayId, required this.taskId});
-  
+  const DeleteTaskUseCaseParams({
+    required this.dayId,
+    required this.taskId,
+    required this.isRecurring,
+  });
+
   @override
   List<Object?> get props => [dayId, taskId];
 }

@@ -34,13 +34,12 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> assignTaskToDay(String dayId, int taskId) async {
+  Future<Either<Failure, Unit>> assignTaskToDay(
+    String dayId,
+    int taskId,
+  ) async {
     try {
-      await localDataSource.addNewDayTaskConnection(
-        dayId,
-        taskId,
-        false,
-      );
+      await localDataSource.addNewDayTaskConnection(dayId, taskId, false);
       return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
@@ -62,17 +61,20 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> updateTask(TaskEntity newTask) async {
+  Future<Either<Failure, Unit>> updateTask(
+    int taskId,
+    int categoryId,
+    String content,
+    bool isRecurring,
+    int diamonds,
+  ) async {
     try {
       await localDataSource.updateGenericTask(
-        TaskModel(
-          taskId: newTask.taskId,
-          categoryId: newTask.categoryId,
-          content: newTask.content,
-          isRecurring: newTask.isRecurring,
-          diamonds: newTask.diamonds,
-          isDone: newTask.isDone,
-        ),
+        taskId,
+        categoryId,
+        content,
+        isRecurring,
+        diamonds,
       );
       return right(unit);
     } on LocalDatabaseException catch (e) {
@@ -95,9 +97,18 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteTask(String dayId, int taskId) async {
+  Future<Either<Failure, Unit>> deleteTask(String? dayId, int taskId, bool isRecurring) async {
     try {
-      await localDataSource.deleteDayTaskConnection(dayId, taskId);
+      if(dayId == null){
+        await localDataSource.deleteTaskCompletely(taskId);
+      }
+      else if(isRecurring == false){
+        await localDataSource.deleteDayTaskConnection(dayId, taskId);
+      }
+      else {
+        await localDataSource.deleteDayTaskConnectionAndSetTaskNotRecurring(dayId, taskId);
+      }
+      
       return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
@@ -109,9 +120,8 @@ class TaskRepositoryImpl implements TaskRepository {
     String dayId,
   ) async {
     try {
-      final List<TaskModel> result = await localDataSource.getDefaultTasksNotAssignedToDay(
-        dayId,
-      );
+      final List<TaskModel> result = await localDataSource
+          .getDefaultTasksNotAssignedToDay(dayId);
       return right(result);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
