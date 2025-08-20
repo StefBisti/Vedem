@@ -26,7 +26,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     required this.updateTaskUseCase,
     required this.deleteTaskUseCase,
     required this.setTaskUseCase,
-  }) : super(TasksInitialState()) {
+  }) : super(TasksEmptyState()) {
     on<CreateNewTaskEvent>(_onCreateNewTaskEvent);
     on<InitializeTasksForDay>(_onInitializeTasksForDayEvent);
     on<ReadTasksForDayEvent>(_onReadTasksForDayEvent);

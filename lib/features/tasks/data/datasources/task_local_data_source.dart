@@ -162,13 +162,13 @@ class TaskLocalDataSource implements TaskDataSource {
   @override
   Future<void> deleteTaskCompletely(int taskId) async {
     try {
-      await db.transaction((txn) async {
-        await db.delete(
+      await db.transaction<void>((txn) async {
+        await txn.delete(
           TasksTableKeys.tasksTableKey,
           where: '${TasksTableKeys.taskIdKey} = ?',
           whereArgs: [taskId],
         );
-        await db.delete(
+        await txn.delete(
           DayTasksTableKeys.dayTasksTableKey,
           where: '${DayTasksTableKeys.dayTaskTaskKey} = ?',
           whereArgs: [taskId],
@@ -201,14 +201,14 @@ class TaskLocalDataSource implements TaskDataSource {
     int taskId,
   ) async {
     try {
-      await db.transaction((txn) async {
-        await db.delete(
+      await db.transaction<void>((txn) async {
+        await txn.delete(
           DayTasksTableKeys.dayTasksTableKey,
           where:
               '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
           whereArgs: [dayId, taskId],
         );
-        await db.update(
+        await txn.update(
           TasksTableKeys.tasksTableKey,
           {TasksTableKeys.taskIsRecurringKey: 0},
           where:
