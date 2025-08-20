@@ -114,18 +114,24 @@ class TaskLocalDataSource implements TaskDataSource {
   }
 
   @override
-  Future<void> updateGenericTask(TaskModel newTask) async {
+  Future<void> updateGenericTask(
+    int taskId,
+    int categoryId,
+    String content,
+    bool isRecurring,
+    int diamonds,
+  ) async {
     try {
       await db.update(
         TasksTableKeys.tasksTableKey,
         {
-          TasksTableKeys.taskCategoryIdKey: newTask.categoryId,
-          TasksTableKeys.taskContentKey: newTask.content,
-          TasksTableKeys.taskIsRecurringKey: newTask.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: newTask.diamonds,
+          TasksTableKeys.taskCategoryIdKey: categoryId,
+          TasksTableKeys.taskContentKey: content,
+          TasksTableKeys.taskIsRecurringKey: isRecurring ? 1 : 0,
+          TasksTableKeys.taskDiamondsKey: diamonds,
         },
         where: '${TasksTableKeys.taskIdKey} = ?',
-        whereArgs: [newTask.taskId],
+        whereArgs: [taskId],
       );
     } catch (e) {
       debugPrint(e.toString());
@@ -154,13 +160,20 @@ class TaskLocalDataSource implements TaskDataSource {
   }
 
   @override
-  Future<void> deleteGenericTask(int taskId) async {
+  Future<void> deleteTaskCompletely(int taskId) async {
     try {
-      await db.delete(
-        TasksTableKeys.tasksTableKey,
-        where: '${TasksTableKeys.taskIdKey} = ?',
-        whereArgs: [taskId],
-      );
+      await db.transaction((txn) async {
+        await db.delete(
+          TasksTableKeys.tasksTableKey,
+          where: '${TasksTableKeys.taskIdKey} = ?',
+          whereArgs: [taskId],
+        );
+        await db.delete(
+          DayTasksTableKeys.dayTasksTableKey,
+          where: '${DayTasksTableKeys.dayTaskTaskKey} = ?',
+          whereArgs: [taskId],
+        );
+      });
     } catch (e) {
       debugPrint(e.toString());
       throw LocalDatabaseException(message: deleteTaskError);
@@ -176,6 +189,33 @@ class TaskLocalDataSource implements TaskDataSource {
             '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
         whereArgs: [dayId, taskId],
       );
+    } catch (e) {
+      debugPrint(e.toString());
+      throw LocalDatabaseException(message: deleteTaskError);
+    }
+  }
+
+  @override
+  Future<void> deleteDayTaskConnectionAndSetTaskNotRecurring(
+    String dayId,
+    int taskId,
+  ) async {
+    try {
+      await db.transaction((txn) async {
+        await db.delete(
+          DayTasksTableKeys.dayTasksTableKey,
+          where:
+              '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
+          whereArgs: [dayId, taskId],
+        );
+        await db.update(
+          TasksTableKeys.tasksTableKey,
+          {TasksTableKeys.taskIsRecurringKey: 0},
+          where:
+              '${TasksTableKeys.taskIdKey} = ?',
+          whereArgs: [taskId],
+        );
+      });
     } catch (e) {
       debugPrint(e.toString());
       throw LocalDatabaseException(message: deleteTaskError);

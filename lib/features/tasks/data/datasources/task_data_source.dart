@@ -15,11 +15,19 @@ abstract interface class TaskDataSource {
 
   Future<List<TaskModel>> getDefaultTasksNotAssignedToDay(String dayId);
 
-  Future<void> updateGenericTask(TaskModel newTask);
+  Future<void> updateGenericTask(
+    int taskId,
+    int categoryId,
+    String content,
+    bool isRecurring,
+    int diamonds,
+  );
 
   Future<void> updateDayTaskConnection(String dayId, int taskId, bool done);
 
-  Future<void> deleteGenericTask(int taskId);
+  Future<void> deleteTaskCompletely(int taskId);
 
   Future<void> deleteDayTaskConnection(String dayId, int taskId);
+
+  Future<void> deleteDayTaskConnectionAndSetTaskNotRecurring(String dayId, int taskId);
 }
