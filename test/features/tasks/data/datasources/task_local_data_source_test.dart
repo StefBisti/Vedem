@@ -87,7 +87,6 @@ void main() {
   test(
     'addNewTaskAndAssignToDay throws LocalDatabaseException when transaction throws',
     () async {
-      // Make transaction throw
       when(
         () => db.transaction<TaskModel>(any()),
       ).thenThrow(Exception('db gone boom'));

@@ -64,7 +64,7 @@ void main() {
           any(),
           any(),
         ),
-      ).thenThrow(LocalDatabaseException(message: addTaskError));
+      ).thenThrow(LocalDatabaseException(message: createTaskError));
       final res = await repo.createNewTaskAndAssignToDay(
         sampleDay,
         1,
@@ -72,7 +72,7 @@ void main() {
         true,
         34,
       );
-      expect(res, left(LocalDatabaseFailure(addTaskError)));
+      expect(res, left(LocalDatabaseFailure(createTaskError)));
     },
   );
 
@@ -87,9 +87,9 @@ void main() {
   test('assignTaskToDay should return failure on exception', () async {
     when(
       () => dataSource.addNewDayTaskConnection(any(), any(), any()),
-    ).thenThrow(LocalDatabaseException(message: addTaskError));
+    ).thenThrow(LocalDatabaseException(message: createTaskError));
     final res = await repo.assignTaskToDay(sampleDay, 54);
-    expect(res, left(LocalDatabaseFailure(addTaskError)));
+    expect(res, left(LocalDatabaseFailure(createTaskError)));
   });
 
   ////////////////// readTasksForDay //////////////////

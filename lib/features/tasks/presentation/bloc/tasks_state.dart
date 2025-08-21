@@ -1,25 +1,28 @@
 part of 'tasks_bloc.dart';
 
-abstract class TasksState extends Equatable {
-  const TasksState();
-  @override
-  List<Object> get props => [];
-}
-
-class TasksEmptyState extends TasksState {}
-
-class TasksLoadingState extends TasksState {}
-
-class TasksSuccessState extends TasksState {
+class TasksState extends Equatable {
   final List<TaskEntity> tasks;
-  const TasksSuccessState({required this.tasks});
-  @override
-  List<Object> get props => [tasks];
-}
+  final bool isLoading;
+  final String? error;
 
-class TasksFailureState extends TasksState {
-  final String failure;
-  const TasksFailureState(this.failure);
+  const TasksState({
+    this.tasks = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  TasksState copyWith({
+    List<TaskEntity>? tasks,
+    bool? isLoading,
+    String? error,
+  }) {
+    return TasksState(
+      tasks: tasks ?? this.tasks,
+      isLoading: isLoading ?? this.isLoading,
+      error: error, 
+    );
+  }
+
   @override
-  List<Object> get props => [failure];
+  List<Object?> get props => [tasks, isLoading, error];
 }

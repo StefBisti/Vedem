@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vedem/core/error/error_messages.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 import 'package:vedem/features/tasks/domain/usecases/create_new_task_use_case.dart';
 import 'package:vedem/features/tasks/domain/usecases/delete_task_usecase.dart';
@@ -26,9 +27,9 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     required this.updateTaskUseCase,
     required this.deleteTaskUseCase,
     required this.setTaskUseCase,
-  }) : super(TasksEmptyState()) {
+  }) : super(const TasksState()) {
     on<CreateNewTaskEvent>(_onCreateNewTaskEvent);
-    on<InitializeTasksForDay>(_onInitializeTasksForDayEvent);
+    on<InitializeTasksForDayEvent>(_onInitializeTasksForDayEvent);
     on<ReadTasksForDayEvent>(_onReadTasksForDayEvent);
     on<UpdateTaskEvent>(_onUpdateTaskEvent);
     on<DeleteTaskEvent>(_onDeleteTaskEvent);
@@ -39,14 +40,13 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     CreateNewTaskEvent event,
     Emitter<TasksState> emit,
   ) async {
-    if (state is! TasksSuccessState) {
-      emit(TasksFailureState('Tried to add task in an invalid app state'));
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;
     }
 
-    final int tempId = -DateTime.now().microsecondsSinceEpoch;
     final tempTask = TaskEntity(
-      taskId: tempId,
+      taskId: -1,
       categoryId: event.categoryId,
       content: event.content,
       isRecurring: event.isRecurring,
@@ -54,10 +54,8 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       isDone: false,
     );
 
-    final optimisticTasks = List<TaskEntity>.from(
-      (state as TasksSuccessState).tasks,
-    )..add(tempTask);
-    emit(TasksSuccessState(tasks: optimisticTasks));
+    final optimisticTasks = List<TaskEntity>.from(state.tasks)..add(tempTask);
+    emit(TasksState(tasks: optimisticTasks, isLoading: true, error: null));
 
     final res = await createNewTaskUseCase.call(
       CreateNewTaskUseCaseParams(
@@ -70,39 +68,41 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     );
     res.fold(
       (failure) {
-        if (state is TasksSuccessState &&
-            (state as TasksSuccessState).tasks.any((t) => t.taskId == tempId)) {
-          final afterFailure = (state as TasksSuccessState).tasks
-              .where((t) => t.taskId != tempId)
-              .toList();
-          emit(TasksSuccessState(tasks: afterFailure));
-        }
-        emit(TasksFailureState(failure.message));
+        final afterFailure = state.tasks.where((t) => t.taskId != -1).toList();
+        emit(
+          TasksState(
+            tasks: afterFailure,
+            isLoading: false,
+            error: failure.message,
+          ),
+        );
       },
       (createdTask) {
-        if (state is TasksSuccessState &&
-            (state as TasksSuccessState).tasks.any((t) => t.taskId == tempId)) {
-          final currentTasks = (state as TasksSuccessState).tasks;
-          final replaced = currentTasks
-              .map((t) => t.taskId == tempId ? createdTask : t)
-              .toList();
-          emit(TasksSuccessState(tasks: replaced));
-        }
+        final replaced = state.tasks
+            .map((t) => t.taskId == -1 ? createdTask : t)
+            .toList();
+        emit(TasksState(tasks: replaced, isLoading: false, error: null));
       },
     );
   }
 
   void _onInitializeTasksForDayEvent(
-    InitializeTasksForDay event,
+    InitializeTasksForDayEvent event,
     Emitter<TasksState> emit,
   ) async {
-    emit(TasksLoadingState());
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
+      return;
+    }
+    emit(TasksState(tasks: [], isLoading: true, error: null));
     final res = await initializeTasksForDayUseCase.call(
       InitializeTasksForDayUseCaseParams(dayId: event.dayId),
     );
     res.fold(
-      (failure) => emit(TasksFailureState(failure.message)),
-      (initialTasks) => emit(TasksSuccessState(tasks: initialTasks)),
+      (failure) =>
+          emit(TasksState(tasks: [], isLoading: false, error: failure.message)),
+      (initialTasks) =>
+          emit(TasksState(tasks: initialTasks, isLoading: false, error: null)),
     );
   }
 
@@ -110,13 +110,19 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     ReadTasksForDayEvent event,
     Emitter<TasksState> emit,
   ) async {
-    emit(TasksLoadingState());
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
+      return;
+    }
+    emit(TasksState(tasks: [], isLoading: true, error: null));
     final res = await readTasksForDayUseCase.call(
       ReadTasksForDayUseCaseParams(dayId: event.dayId),
     );
     res.fold(
-      (failure) => emit(TasksFailureState(failure.message)),
-      (tasks) => emit(TasksSuccessState(tasks: tasks)),
+      (failure) =>
+          emit(TasksState(tasks: [], isLoading: false, error: failure.message)),
+      (dayTasks) =>
+          emit(TasksState(tasks: dayTasks, isLoading: false, error: null)),
     );
   }
 
@@ -124,20 +130,18 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     UpdateTaskEvent event,
     Emitter<TasksState> emit,
   ) async {
-    if (state is! TasksSuccessState) {
-      emit(TasksFailureState('Tried to update a task in an invalid app state'));
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;
     }
-    final currentState = state as TasksSuccessState;
-    final optimisticTasks = List<TaskEntity>.from(currentState.tasks);
 
-    late TaskEntity previousTask;
-    late TaskEntity newTask;
+    final optimisticTasks = List<TaskEntity>.from(state.tasks);
+    TaskEntity? previousTask;
+    TaskEntity? newTask;
     for (int i = 0; i < optimisticTasks.length; i++) {
       if (optimisticTasks[i].taskId == event.taskId) {
         previousTask = optimisticTasks[i];
-        newTask = TaskEntity(
-          taskId: event.taskId,
+        newTask = previousTask.copyWith(
           categoryId: event.newCategoryId,
           content: event.newContent,
           isRecurring: event.newIsRecurring,
@@ -148,7 +152,11 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         break;
       }
     }
-    emit(TasksSuccessState(tasks: optimisticTasks));
+    if (previousTask == null) {
+      emit(state.copyWith(error: genericError));
+      return;
+    }
+    emit(TasksState(tasks: optimisticTasks, isLoading: true, error: null));
 
     final res = await updateTaskUseCase.call(
       UpdateTaskUseCaseParams(
@@ -159,34 +167,41 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         diamonds: event.newDiamonds,
       ),
     );
-    res.fold((failure) {
-      if (state is TasksSuccessState) {
-        final afterFailure = (state as TasksSuccessState).tasks;
+    res.fold(
+      (failure) {
+        final afterFailure = List<TaskEntity>.from(state.tasks);
         for (int i = 0; i < afterFailure.length; i++) {
-          if (afterFailure[i].taskId == previousTask.taskId) {
-            afterFailure[i] = previousTask;
+          if (afterFailure[i].taskId == newTask!.taskId) {
+            afterFailure[i] = previousTask!;
             break;
           }
         }
-        emit(TasksSuccessState(tasks: afterFailure));
-      }
-      emit(TasksFailureState(failure.message));
-    }, (unit) {});
+        emit(
+          TasksState(
+            tasks: afterFailure,
+            isLoading: false,
+            error: failure.message,
+          ),
+        );
+      },
+      (unit) {
+        emit(state.copyWith(isLoading: false, error: null));
+      },
+    );
   }
 
   void _onDeleteTaskEvent(
     DeleteTaskEvent event,
     Emitter<TasksState> emit,
   ) async {
-    if (state is! TasksSuccessState) {
-      emit(TasksFailureState('Tried to delete a task in an invalid app state'));
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;
     }
-    final optimisticTasks = List<TaskEntity>.from(
-      (state as TasksSuccessState).tasks,
-    );
-    late TaskEntity? deletedTask;
-    late int? deletedIndex;
+
+    final optimisticTasks = List<TaskEntity>.from(state.tasks);
+    TaskEntity? deletedTask;
+    int? deletedIndex;
     for (int i = 0; i < optimisticTasks.length; i++) {
       if (optimisticTasks[i].taskId == event.taskId) {
         deletedTask = optimisticTasks[i];
@@ -195,13 +210,12 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       }
     }
     if (deletedTask == null) {
-      emit(TasksFailureState('Tried to delete a task that does not exist'));
+      emit(state.copyWith(error: genericError));
       return;
     }
     optimisticTasks.removeAt(deletedIndex!);
-    emit(TasksSuccessState(tasks: optimisticTasks));
+    emit(TasksState(tasks: optimisticTasks, isLoading: true, error: null));
 
-    final currentState = state;
     final res = await deleteTaskUseCase.call(
       DeleteTaskUseCaseParams(
         dayId: event.dayId,
@@ -209,44 +223,47 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         isRecurring: event.isRecurring,
       ),
     );
-    res.fold((failure) {
-      if (state == currentState) {
-        // state has not changed
-        final afterFailure = List<TaskEntity>.from(
-          (state as TasksSuccessState).tasks,
-        );
+    res.fold(
+      (failure) {
+        final afterFailure = List<TaskEntity>.from(state.tasks);
         afterFailure.insert(deletedIndex!, deletedTask!);
-        emit(TasksSuccessState(tasks: afterFailure));
-      }
-      emit(TasksFailureState(failure.message));
-    }, (unit) {});
+        emit(
+          TasksState(
+            tasks: afterFailure,
+            isLoading: false,
+            error: failure.message,
+          ),
+        );
+      },
+      (unit) {
+        emit(state.copyWith(isLoading: false, error: null));
+      },
+    );
   }
 
   void _onSetTaskEvent(SetTaskEvent event, Emitter<TasksState> emit) async {
-    if (state is! TasksSuccessState) {
-      emit(TasksFailureState('Tried to set a task in an invalid app state'));
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;
     }
-    final optimisticTasks = List<TaskEntity>.from(
-      (state as TasksSuccessState).tasks,
-    );
+
+    final optimisticTasks = List<TaskEntity>.from(state.tasks);
+    bool found = false;
     for (int i = 0; i < optimisticTasks.length; i++) {
       if (optimisticTasks[i].taskId == event.taskId) {
-        final newTask = TaskEntity(
-          taskId: optimisticTasks[i].taskId,
-          categoryId: optimisticTasks[i].categoryId,
-          content: optimisticTasks[i].content,
-          isRecurring: optimisticTasks[i].isRecurring,
-          diamonds: optimisticTasks[i].diamonds,
+        optimisticTasks[i] = optimisticTasks[i].copyWith(
           isDone: event.completed,
         );
-        optimisticTasks[i] = newTask;
+        found = true;
         break;
       }
     }
-    emit(TasksSuccessState(tasks: optimisticTasks));
+    if (found == false) {
+      emit(state.copyWith(error: genericError));
+      return;
+    }
+    emit(TasksState(tasks: optimisticTasks, isLoading: true, error: null));
 
-    final currentState = state;
     final res = await setTaskUseCase.call(
       SetTaskUseCaseParams(
         dayId: event.dayId,
@@ -254,28 +271,28 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         completed: event.completed,
       ),
     );
-    res.fold((failure) {
-      if (state == currentState) {
-        final afterFailure = List<TaskEntity>.from(
-          (state as TasksSuccessState).tasks,
-        );
+    res.fold(
+      (failure) {
+        final afterFailure = List<TaskEntity>.from(state.tasks);
         for (int i = 0; i < afterFailure.length; i++) {
           if (afterFailure[i].taskId == event.taskId) {
-            final newTask = TaskEntity(
-              taskId: afterFailure[i].taskId,
-              categoryId: afterFailure[i].categoryId,
-              content: afterFailure[i].content,
-              isRecurring: afterFailure[i].isRecurring,
-              diamonds: afterFailure[i].diamonds,
+            afterFailure[i] = afterFailure[i].copyWith(
               isDone: !event.completed,
             );
-            afterFailure[i] = newTask;
             break;
           }
         }
-        emit(TasksSuccessState(tasks: afterFailure));
-      }
-      emit(TasksFailureState(failure.message));
-    }, (unit) {});
+        emit(
+          TasksState(
+            tasks: afterFailure,
+            isLoading: false,
+            error: failure.message,
+          ),
+        );
+      },
+      (unit) {
+        emit(state.copyWith(isLoading: false, error: null));
+      },
+    );
   }
 }

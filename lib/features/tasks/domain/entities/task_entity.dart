@@ -17,6 +17,24 @@ class TaskEntity extends Equatable {
     required this.isDone,
   });
 
+  TaskEntity copyWith({
+    int? taskId,
+    int? categoryId,
+    String? content,
+    bool? isRecurring,
+    int? diamonds,
+    bool? isDone,
+  }) {
+    return TaskEntity(
+      taskId: taskId ?? this.taskId,
+      categoryId: categoryId ?? this.categoryId,
+      content: content ?? this.content,
+      isRecurring: isRecurring ?? this.isRecurring,
+      diamonds: diamonds ?? this.diamonds,
+      isDone: isDone ?? this.isDone,
+    );
+  }
+
   @override
   List<Object?> get props => [
     taskId,
