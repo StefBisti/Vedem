@@ -45,7 +45,7 @@ class TaskLocalDataSource implements TaskDataSource {
       });
     } catch (e) {
       debugPrint(e.toString());
-      throw LocalDatabaseException(message: addTaskError);
+      throw LocalDatabaseException(message: createTaskError);
     }
   }
 
@@ -63,7 +63,7 @@ class TaskLocalDataSource implements TaskDataSource {
       });
     } catch (e) {
       debugPrint(e.toString());
-      throw LocalDatabaseException(message: addTaskError);
+      throw LocalDatabaseException(message: createTaskError);
     }
   }
 

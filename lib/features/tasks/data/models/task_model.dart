@@ -11,6 +11,7 @@ class TaskModel extends TaskEntity {
     required super.isDone,
   });
 
+  @override
   TaskModel copyWith({
     int? taskId,
     int? categoryId,

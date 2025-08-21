@@ -32,9 +32,9 @@ class CreateNewTaskEvent extends TasksEvent {
   ];
 }
 
-class InitializeTasksForDay extends TasksEvent {
+class InitializeTasksForDayEvent extends TasksEvent {
   final String dayId;
-  const InitializeTasksForDay({required this.dayId});
+  const InitializeTasksForDayEvent({required this.dayId});
   @override
   List<Object> get props => [dayId];
 }
@@ -52,7 +52,6 @@ class UpdateTaskEvent extends TasksEvent {
   final String newContent;
   final bool newIsRecurring;
   final int newDiamonds;
-  final int previousDiamonds;
 
   const UpdateTaskEvent({
     required this.taskId,
@@ -60,7 +59,6 @@ class UpdateTaskEvent extends TasksEvent {
     required this.newContent,
     required this.newIsRecurring,
     required this.newDiamonds,
-    required this.previousDiamonds,
   });
 
   @override
