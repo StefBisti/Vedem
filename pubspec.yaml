@@ -34,3 +34,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/figtree/Figtree-Regular.ttf
+        - asset: assets/fonts/figtree/Figtree-Bold.ttf
+          weight: 700
+  assets:
+    - assets/
