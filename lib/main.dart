@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vedem/core/pages/day_page.dart';
+import 'package:vedem/core/style/app_themes.dart';
 import 'package:vedem/init_dependencies.dart';
 
 void main() async {
@@ -14,10 +16,10 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      debugShowCheckedModeBanner: false,
+      title: 'Vedem',
+      theme: AppThemes.theme,
+      home: DayPage(),
     );
   }
 }
