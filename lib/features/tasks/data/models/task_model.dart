@@ -40,4 +40,13 @@ class TaskModel extends TaskEntity {
       isDone: ((map[DayTasksTableKeys.dayTaskDoneKey] ?? 0) as int) == 1,
     );
   }
+  
+  TaskEntity toEntity() => TaskEntity(
+    taskId: taskId,
+    categoryId: categoryId,
+    content: content,
+    isRecurring: isRecurring,
+    diamonds: diamonds,
+    isDone: isDone,
+  );
 }

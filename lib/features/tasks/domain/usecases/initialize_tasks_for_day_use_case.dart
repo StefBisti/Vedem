@@ -15,7 +15,7 @@ class InitializeTasksForDayUseCase
   Future<Either<Failure, List<TaskEntity>>> call(
     InitializeTasksForDayUseCaseParams params,
   ) async {
-    return await taskRepository.getDefaultTasksNotAssignedToDay(params.dayId);
+    return await taskRepository.initializeTasksForDay(params.dayId);
   }
 }
 
