@@ -13,6 +13,8 @@ abstract interface class TaskDataSource {
 
   Future<List<TaskModel>> readTasksForDay(String dayId);
 
+  Future<List<TaskModel>> readTasksForMonth(String monthId);
+
   Future<List<TaskModel>> getDefaultTasksNotAssignedToDay(String dayId);
 
   Future<void> updateGenericTask(

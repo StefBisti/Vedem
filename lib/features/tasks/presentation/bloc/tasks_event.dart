@@ -46,6 +46,13 @@ class ReadTasksForDayEvent extends TasksEvent {
   List<Object> get props => [dayId];
 }
 
+class ReadTasksForMonthEvent extends TasksEvent {
+  final String monthId;
+  const ReadTasksForMonthEvent({required this.monthId});
+  @override
+  List<Object> get props => [monthId];
+}
+
 class UpdateTaskEvent extends TasksEvent {
   final int taskId;
   final int newCategoryId;
@@ -74,12 +81,10 @@ class UpdateTaskEvent extends TasksEvent {
 class DeleteTaskEvent extends TasksEvent {
   final String? dayId;
   final int taskId;
-  final bool isRecurring;
 
   const DeleteTaskEvent({
     required this.dayId,
     required this.taskId,
-    required this.isRecurring,
   });
 
   @override

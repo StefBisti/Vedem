@@ -9,6 +9,7 @@ import 'package:vedem/features/tasks/domain/usecases/create_new_task_use_case.da
 import 'package:vedem/features/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:vedem/features/tasks/domain/usecases/initialize_tasks_for_day_use_case.dart';
 import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_day_usecase.dart';
+import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_month_use_case.dart';
 import 'package:vedem/features/tasks/domain/usecases/set_task_usecase.dart';
 import 'package:vedem/features/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
@@ -30,6 +31,12 @@ class MockReadTasksForDayUseCase extends Mock
 class FakeReadTasksForDayUseCaseParams extends Fake
     implements ReadTasksForDayUseCaseParams {}
 
+class MockReadTasksForMonthUseCase extends Mock
+    implements ReadTasksForMonthUseCase {}
+
+class FakeReadTasksForMonthUseCaseParams extends Fake
+    implements ReadTasksForMonthUseCaseParams {}
+
 class MockUpdateTaskUseCase extends Mock implements UpdateTaskUseCase {}
 
 class FakeUpdateTaskUseCaseParams extends Fake
@@ -48,6 +55,7 @@ void main() {
   late MockCreateNewTaskUseCase createNewTaskUseCase;
   late MockInitializeTasksForDayUseCase initializeTasksForDayUseCase;
   late MockReadTasksForDayUseCase readTasksForDayUseCase;
+  late MockReadTasksForMonthUseCase readTasksForMonthUseCase;
   late MockUpdateTaskUseCase updateTaskUseCase;
   late MockDeleteTaskUseCase deleteTaskUseCase;
   late MockSetTaskUseCase setTaskUseCase;
@@ -74,6 +82,7 @@ void main() {
     createNewTaskUseCase = MockCreateNewTaskUseCase();
     initializeTasksForDayUseCase = MockInitializeTasksForDayUseCase();
     readTasksForDayUseCase = MockReadTasksForDayUseCase();
+    readTasksForMonthUseCase = MockReadTasksForMonthUseCase();
     updateTaskUseCase = MockUpdateTaskUseCase();
     deleteTaskUseCase = MockDeleteTaskUseCase();
     setTaskUseCase = MockSetTaskUseCase();
@@ -81,6 +90,7 @@ void main() {
       createNewTaskUseCase: createNewTaskUseCase,
       initializeTasksForDayUseCase: initializeTasksForDayUseCase,
       readTasksForDayUseCase: readTasksForDayUseCase,
+      readTasksForMonthUseCase: readTasksForMonthUseCase,
       updateTaskUseCase: updateTaskUseCase,
       deleteTaskUseCase: deleteTaskUseCase,
       setTaskUseCase: setTaskUseCase,
@@ -91,6 +101,7 @@ void main() {
     registerFallbackValue(FakeCreateNewTaskUseCaseParams());
     registerFallbackValue(FakeInitializeTasksForDayUseCaseParams());
     registerFallbackValue(FakeReadTasksForDayUseCaseParams());
+    registerFallbackValue(FakeReadTasksForMonthUseCaseParams());
     registerFallbackValue(FakeUpdateTaskUseCaseParams());
     registerFallbackValue(FakeDeleteTaskUseCase());
     registerFallbackValue(FakeSetTaskUseCaseParams());
@@ -333,6 +344,75 @@ void main() {
     );
   });
 
+  group('Read tasks for a month', () {
+    blocTest<TasksBloc, TasksState>(
+      'Trying to read tasks for a month a while isLoading gives error',
+      build: () {
+        return bloc;
+      },
+      seed: () => TasksState(tasks: [], isLoading: true, error: null),
+      act: (bloc) => bloc.add(ReadTasksForMonthEvent(monthId: '2025-08')),
+      expect: () => [
+        TasksState(
+          tasks: [],
+          isLoading: true,
+          error: noOperationWhileIsLoadingError,
+        ),
+      ],
+      verify: (bloc) {
+        verifyZeroInteractions(readTasksForMonthUseCase);
+      },
+    );
+    blocTest<TasksBloc, TasksState>(
+      'State will be initially loading, with no tasks, then will have the month tasks if successful',
+      build: () {
+        when(
+          () => readTasksForMonthUseCase.call(any()),
+        ).thenAnswer((_) async => right([sampleTask1, sampleTask2]));
+        return bloc;
+      },
+      seed: () => TasksState(tasks: [], isLoading: false, error: null),
+      act: (bloc) => bloc.add(ReadTasksForMonthEvent(monthId: '2025-08')),
+      expect: () => [
+        TasksState(tasks: [], isLoading: true, error: null),
+        TasksState(
+          tasks: [sampleTask1, sampleTask2],
+          isLoading: false,
+          error: null,
+        ),
+      ],
+      verify: (bloc) {
+        verify(
+          () => readTasksForMonthUseCase.call(
+            ReadTasksForMonthUseCaseParams(monthId: '2025-08'),
+          ),
+        ).called(1);
+      },
+    );
+    blocTest<TasksBloc, TasksState>(
+      'State will be initially loading, with no tasks, then, if failure, will have an error message',
+      build: () {
+        when(
+          () => readTasksForMonthUseCase.call(any()),
+        ).thenAnswer((_) async => left(LocalDatabaseFailure(readTasksError)));
+        return bloc;
+      },
+      seed: () => TasksState(tasks: [], isLoading: false, error: null),
+      act: (bloc) => bloc.add(ReadTasksForMonthEvent(monthId: '2025-08')),
+      expect: () => [
+        TasksState(tasks: [], isLoading: true, error: null),
+        TasksState(tasks: [], isLoading: false, error: readTasksError),
+      ],
+      verify: (bloc) {
+        verify(
+          () => readTasksForMonthUseCase.call(
+            ReadTasksForMonthUseCaseParams(monthId: '2025-08'),
+          ),
+        ).called(1);
+      },
+    );
+  });
+
   group('Update a task', () {
     blocTest<TasksBloc, TasksState>(
       'Trying to update a task while isLoading gives error',
@@ -493,11 +573,7 @@ void main() {
         error: null,
       ),
       act: (bloc) => bloc.add(
-        DeleteTaskEvent(
-          dayId: sampleDayId,
-          taskId: sampleTask1.taskId,
-          isRecurring: sampleTask1.isRecurring,
-        ),
+        DeleteTaskEvent(dayId: sampleDayId, taskId: sampleTask1.taskId),
       ),
       expect: () => [
         TasksState(
@@ -518,11 +594,7 @@ void main() {
       seed: () =>
           TasksState(tasks: [sampleTask2], isLoading: false, error: null),
       act: (bloc) => bloc.add(
-        DeleteTaskEvent(
-          dayId: sampleDayId,
-          taskId: sampleTask1.taskId,
-          isRecurring: sampleTask1.isRecurring,
-        ),
+        DeleteTaskEvent(dayId: sampleDayId, taskId: sampleTask1.taskId),
       ),
       expect: () => [
         TasksState(tasks: [sampleTask2], isLoading: false, error: genericError),
@@ -545,11 +617,7 @@ void main() {
         error: null,
       ),
       act: (bloc) => bloc.add(
-        DeleteTaskEvent(
-          dayId: sampleDayId,
-          taskId: sampleTask1.taskId,
-          isRecurring: sampleTask1.isRecurring,
-        ),
+        DeleteTaskEvent(dayId: sampleDayId, taskId: sampleTask1.taskId),
       ),
       expect: () => [
         TasksState(tasks: [sampleTask2], isLoading: true, error: null),
@@ -581,11 +649,7 @@ void main() {
         error: null,
       ),
       act: (bloc) => bloc.add(
-        DeleteTaskEvent(
-          dayId: sampleDayId,
-          taskId: sampleTask1.taskId,
-          isRecurring: sampleTask1.isRecurring,
-        ),
+        DeleteTaskEvent(dayId: sampleDayId, taskId: sampleTask1.taskId),
       ),
       expect: () => [
         TasksState(tasks: [sampleTask2], isLoading: true, error: null),

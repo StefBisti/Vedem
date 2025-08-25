@@ -12,12 +12,11 @@ abstract interface class TaskRepository {
     int diamonds,
   );
 
-  /// assigns an existing task to a day
-  /// for future updates
-  Future<Either<Failure, Unit>> assignTaskToDay(String dayId, int taskId);
-
   /// returns either a list of TaskEntities with ids assigned to a day
   Future<Either<Failure, List<TaskEntity>>> readTasksForDay(String dayId);
+
+  /// returns either a list of TaskEntities with ids assigned to a month
+  Future<Either<Failure, List<TaskEntity>>> readTasksForMonth(String monthId);
 
   /// updates a task based on its id
   Future<Either<Failure, Unit>> updateTask(
@@ -43,7 +42,7 @@ abstract interface class TaskRepository {
   );
 
   /// gets recurring tasks or second chance tasks for a day
-  Future<Either<Failure, List<TaskEntity>>> getDefaultTasksNotAssignedToDay(
+  Future<Either<Failure, List<TaskEntity>>> initializeTasksForDay(
     String dayId,
   );
 }

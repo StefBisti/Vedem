@@ -6,6 +6,7 @@ import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
 import 'package:vedem/features/tasks/data/models/task_model.dart';
 import 'package:sqflite/sqflite.dart';
 
+// TO DO See trashed tasks
 class TaskLocalDataSource implements TaskDataSource {
   final Database db;
 
@@ -72,18 +73,57 @@ class TaskLocalDataSource implements TaskDataSource {
     try {
       final result = await db.rawQuery(
         '''
-      SELECT 
-        t.${TasksTableKeys.taskIdKey},
-        t.${TasksTableKeys.taskCategoryIdKey},
-        t.${TasksTableKeys.taskContentKey},
-        t.${TasksTableKeys.taskIsRecurringKey},
-        t.${TasksTableKeys.taskDiamondsKey},
-        dt.${DayTasksTableKeys.dayTaskDoneKey}
-      FROM ${DayTasksTableKeys.dayTasksTableKey} dt
-      INNER JOIN ${TasksTableKeys.tasksTableKey} t ON dt.${DayTasksTableKeys.dayTaskTaskKey} = t.${TasksTableKeys.taskIdKey}
-      WHERE dt.${DayTasksTableKeys.dayTaskDayKey} = ?
-    ''',
+          SELECT 
+            t.${TasksTableKeys.taskIdKey},
+            t.${TasksTableKeys.taskCategoryIdKey},
+            t.${TasksTableKeys.taskContentKey},
+            t.${TasksTableKeys.taskIsRecurringKey},
+            t.${TasksTableKeys.taskDiamondsKey},
+            dt.${DayTasksTableKeys.dayTaskDoneKey}
+          FROM ${DayTasksTableKeys.dayTasksTableKey} dt
+          INNER JOIN ${TasksTableKeys.tasksTableKey} t ON dt.${DayTasksTableKeys.dayTaskTaskKey} = t.${TasksTableKeys.taskIdKey}
+          WHERE dt.${DayTasksTableKeys.dayTaskDayKey} = ?
+        ''',
         [dayId],
+      );
+      return result.map((e) => TaskModel.fromMap(e)).toList();
+    } catch (e) {
+      debugPrint(e.toString());
+      throw LocalDatabaseException(message: readTasksError);
+    }
+  }
+
+  @override
+  Future<List<TaskModel>> readTasksForMonth(String monthId) async {
+    try {
+      final parts = monthId.split('-');
+
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+
+      final nextMonth = (month == 12)
+          ? DateTime(year + 1, 1, 1)
+          : DateTime(year, month + 1, 1);
+
+      String formatDate(DateTime d) =>
+          '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+      final startStr = '$monthId-01';
+      final endStr = formatDate(nextMonth);
+
+      final result = await db.rawQuery(
+        '''
+          SELECT DISTINCT
+            t.${TasksTableKeys.taskIdKey},
+            t.${TasksTableKeys.taskCategoryIdKey},
+            t.${TasksTableKeys.taskContentKey},
+            t.${TasksTableKeys.taskIsRecurringKey},
+            t.${TasksTableKeys.taskDiamondsKey}
+          FROM ${DayTasksTableKeys.dayTasksTableKey} dt
+          INNER JOIN ${TasksTableKeys.tasksTableKey} t ON dt.${DayTasksTableKeys.dayTaskTaskKey} = t.${TasksTableKeys.taskIdKey}
+          WHERE dt.${DayTasksTableKeys.dayTaskDayKey} >= ? AND dt.${DayTasksTableKeys.dayTaskDayKey} < ?
+        ''',
+        [startStr, endStr],
       );
       return result.map((e) => TaskModel.fromMap(e)).toList();
     } catch (e) {
@@ -211,8 +251,7 @@ class TaskLocalDataSource implements TaskDataSource {
         await txn.update(
           TasksTableKeys.tasksTableKey,
           {TasksTableKeys.taskIsRecurringKey: 0},
-          where:
-              '${TasksTableKeys.taskIdKey} = ?',
+          where: '${TasksTableKeys.taskIdKey} = ?',
           whereArgs: [taskId],
         );
       });

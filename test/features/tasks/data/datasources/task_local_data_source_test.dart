@@ -153,6 +153,46 @@ void main() {
     },
   );
 
+  ////////////////// readTasksForMonth //////////////////
+  test(
+    'readTasksForMonth returns a list of TaskModel when query succeeds 1',
+    () async {
+      when(
+        () => db.rawQuery(any(), any()),
+      ).thenAnswer((_) async => [sampleDbRow]);
+      final result = await dataSource.readTasksForMonth('2025-08');
+      expect(result, hasLength(1));
+      expect(result[0], sampleTask);
+      verify(
+        () => db.rawQuery(any(that: contains('INNER JOIN')), ['2025-08-01', '2025-09-01']),
+      ).called(1);
+    },
+  );
+  test(
+    'readTasksForMonth returns a list of TaskModel when query succeeds 2',
+    () async {
+      when(
+        () => db.rawQuery(any(), any()),
+      ).thenAnswer((_) async => [sampleDbRow]);
+      final result = await dataSource.readTasksForMonth('2025-12');
+      expect(result, hasLength(1));
+      expect(result[0], sampleTask);
+      verify(
+        () => db.rawQuery(any(that: contains('INNER JOIN')), ['2025-12-01', '2026-01-01']),
+      ).called(1);
+    },
+  );
+  test(
+    'readTasksForMonth throws LocalDatabaseException when query fails',
+    () async {
+      when(() => db.rawQuery(any(), any())).thenThrow(Exception('DB error'));
+      expect(
+        () => dataSource.readTasksForMonth('2025-12'),
+        throwsA(isA<LocalDatabaseException>()),
+      );
+    },
+  );
+
   ////////////////// getDefaultTasksNotAssignedToDay //////////////////
   test(
     'getDefaultTasksNotAssignedToDay returns a list of recurring TaskModels when query succeeds',
@@ -277,7 +317,6 @@ void main() {
         return callback(txn);
       });
 
-      // Mock the delete operations
       when(
         () => txn.delete(
           TasksTableKeys.tasksTableKey,

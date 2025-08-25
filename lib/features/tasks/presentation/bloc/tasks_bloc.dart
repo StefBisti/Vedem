@@ -6,6 +6,7 @@ import 'package:vedem/features/tasks/domain/usecases/create_new_task_use_case.da
 import 'package:vedem/features/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:vedem/features/tasks/domain/usecases/initialize_tasks_for_day_use_case.dart';
 import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_day_usecase.dart';
+import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_month_use_case.dart';
 import 'package:vedem/features/tasks/domain/usecases/set_task_usecase.dart';
 import 'package:vedem/features/tasks/domain/usecases/update_task_usecase.dart';
 
@@ -16,6 +17,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   final CreateNewTaskUseCase createNewTaskUseCase;
   final InitializeTasksForDayUseCase initializeTasksForDayUseCase;
   final ReadTasksForDayUseCase readTasksForDayUseCase;
+  final ReadTasksForMonthUseCase readTasksForMonthUseCase;
   final UpdateTaskUseCase updateTaskUseCase;
   final DeleteTaskUseCase deleteTaskUseCase;
   final SetTaskUseCase setTaskUseCase;
@@ -24,6 +26,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     required this.createNewTaskUseCase,
     required this.initializeTasksForDayUseCase,
     required this.readTasksForDayUseCase,
+    required this.readTasksForMonthUseCase,
     required this.updateTaskUseCase,
     required this.deleteTaskUseCase,
     required this.setTaskUseCase,
@@ -31,6 +34,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<CreateNewTaskEvent>(_onCreateNewTaskEvent);
     on<InitializeTasksForDayEvent>(_onInitializeTasksForDayEvent);
     on<ReadTasksForDayEvent>(_onReadTasksForDayEvent);
+    on<ReadTasksForMonthEvent>(_onReadTasksForMonthEvent);
     on<UpdateTaskEvent>(_onUpdateTaskEvent);
     on<DeleteTaskEvent>(_onDeleteTaskEvent);
     on<SetTaskEvent>(_onSetTaskEvent);
@@ -117,6 +121,26 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     emit(TasksState(tasks: [], isLoading: true, error: null));
     final res = await readTasksForDayUseCase.call(
       ReadTasksForDayUseCaseParams(dayId: event.dayId),
+    );
+    res.fold(
+      (failure) =>
+          emit(TasksState(tasks: [], isLoading: false, error: failure.message)),
+      (dayTasks) =>
+          emit(TasksState(tasks: dayTasks, isLoading: false, error: null)),
+    );
+  }
+
+  void _onReadTasksForMonthEvent(
+    ReadTasksForMonthEvent event,
+    Emitter<TasksState> emit,
+  ) async {
+    if (state.isLoading) {
+      emit(state.copyWith(error: noOperationWhileIsLoadingError));
+      return;
+    }
+    emit(TasksState(tasks: [], isLoading: true, error: null));
+    final res = await readTasksForMonthUseCase.call(
+      ReadTasksForMonthUseCaseParams(monthId: event.monthId),
     );
     res.fold(
       (failure) =>
@@ -220,7 +244,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       DeleteTaskUseCaseParams(
         dayId: event.dayId,
         taskId: event.taskId,
-        isRecurring: event.isRecurring,
+        isRecurring: deletedTask.isRecurring,
       ),
     );
     res.fold(
