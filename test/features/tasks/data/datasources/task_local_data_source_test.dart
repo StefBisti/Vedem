@@ -25,12 +25,12 @@ void main() {
   );
   final String sampleDay = '2025-08-18';
   final sampleDbRow = {
-    TasksTableKeys.taskIdKey: 54,
-    TasksTableKeys.taskCategoryIdKey: 1,
-    TasksTableKeys.taskContentKey: 'test',
-    TasksTableKeys.taskIsRecurringKey: 1,
-    TasksTableKeys.taskDiamondsKey: 34,
-    DayTasksTableKeys.dayTaskDoneKey: 0,
+    TasksKeys.id: 54,
+    TasksKeys.categoryId: 1,
+    TasksKeys.content: 'test',
+    TasksKeys.isRecurring: 1,
+    TasksKeys.diamonds: 34,
+    DayTasksKeys.done: 0,
   };
 
   setUp(() {
@@ -44,10 +44,10 @@ void main() {
     'addNewTaskAndAssignToDay should insert into tasks and dayTasks when success',
     () async {
       when(
-        () => txn.insert(TasksTableKeys.tasksTableKey, any()),
+        () => txn.insert(TasksKeys.table, any()),
       ).thenAnswer((_) async => 54);
       when(
-        () => txn.insert(DayTasksTableKeys.dayTasksTableKey, any()),
+        () => txn.insert(DayTasksKeys.table, any()),
       ).thenAnswer((_) async => 1001);
       when(() => db.transaction<TaskModel>(any())).thenAnswer((inv) {
         final callback =
@@ -66,18 +66,18 @@ void main() {
 
       expect(res, sampleTask);
       verify(
-        () => txn.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskCategoryIdKey: 1,
-          TasksTableKeys.taskContentKey: 'test',
-          TasksTableKeys.taskIsRecurringKey: 1,
-          TasksTableKeys.taskDiamondsKey: 34,
+        () => txn.insert(TasksKeys.table, {
+          TasksKeys.categoryId: 1,
+          TasksKeys.content: 'test',
+          TasksKeys.isRecurring: 1,
+          TasksKeys.diamonds: 34,
         }),
       ).called(1);
       verify(
-        () => txn.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDay,
-          DayTasksTableKeys.dayTaskTaskKey: 54,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        () => txn.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDay,
+          DayTasksKeys.task: 54,
+          DayTasksKeys.done: 0,
         }),
       ).called(1);
 
@@ -205,7 +205,7 @@ void main() {
       expect(result[0], sampleTask);
       verify(
         () => db.rawQuery(
-          any(that: contains('WHERE ${TasksTableKeys.taskIsRecurringKey} = 1')),
+          any(that: contains('WHERE ${TasksKeys.isRecurring} = 1')),
         ),
       ).called(1);
     },
@@ -234,14 +234,14 @@ void main() {
     await dataSource.updateGenericTask(54, 1, 'test', true, 34);
     verify(
       () => db.update(
-        TasksTableKeys.tasksTableKey,
+        TasksKeys.table,
         {
-          TasksTableKeys.taskCategoryIdKey: 1,
-          TasksTableKeys.taskContentKey: 'test',
-          TasksTableKeys.taskIsRecurringKey: 1,
-          TasksTableKeys.taskDiamondsKey: 34,
+          TasksKeys.categoryId: 1,
+          TasksKeys.content: 'test',
+          TasksKeys.isRecurring: 1,
+          TasksKeys.diamonds: 34,
         },
-        where: '${TasksTableKeys.taskIdKey} = ?',
+        where: '${TasksKeys.id} = ?',
         whereArgs: [54],
       ),
     ).called(1);
@@ -279,10 +279,10 @@ void main() {
       await dataSource.updateDayTaskConnection(sampleDay, 54, true);
       verify(
         () => db.update(
-          DayTasksTableKeys.dayTasksTableKey,
-          {DayTasksTableKeys.dayTaskDoneKey: 1},
+          DayTasksKeys.table,
+          {DayTasksKeys.done: 1},
           where:
-              '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
+              '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
           whereArgs: [sampleDay, 54],
         ),
       ).called(1);
@@ -319,16 +319,16 @@ void main() {
 
       when(
         () => txn.delete(
-          TasksTableKeys.tasksTableKey,
-          where: '${TasksTableKeys.taskIdKey} = ?',
+          TasksKeys.table,
+          where: '${TasksKeys.id} = ?',
           whereArgs: [54],
         ),
       ).thenAnswer((_) async => 1);
 
       when(
         () => txn.delete(
-          DayTasksTableKeys.dayTasksTableKey,
-          where: '${DayTasksTableKeys.dayTaskTaskKey} = ?',
+          DayTasksKeys.table,
+          where: '${DayTasksKeys.task} = ?',
           whereArgs: [54],
         ),
       ).thenAnswer((_) async => 1);
@@ -337,16 +337,16 @@ void main() {
 
       verify(
         () => txn.delete(
-          TasksTableKeys.tasksTableKey,
-          where: '${TasksTableKeys.taskIdKey} = ?',
+          TasksKeys.table,
+          where: '${TasksKeys.id} = ?',
           whereArgs: [54],
         ),
       ).called(1);
 
       verify(
         () => txn.delete(
-          DayTasksTableKeys.dayTasksTableKey,
-          where: '${DayTasksTableKeys.dayTaskTaskKey} = ?',
+          DayTasksKeys.table,
+          where: '${DayTasksKeys.task} = ?',
           whereArgs: [54],
         ),
       ).called(1);
@@ -393,9 +393,9 @@ void main() {
 
       verify(
         () => db.delete(
-          DayTasksTableKeys.dayTasksTableKey,
+          DayTasksKeys.table,
           where:
-              '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
+              '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
           whereArgs: [sampleDay, 54],
         ),
       ).called(1);
@@ -433,18 +433,18 @@ void main() {
 
       when(
         () => txn.delete(
-          DayTasksTableKeys.dayTasksTableKey,
+          DayTasksKeys.table,
           where:
-              '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
+              '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
           whereArgs: [sampleDay, 54],
         ),
       ).thenAnswer((_) async => 1);
 
       when(
         () => txn.update(
-          TasksTableKeys.tasksTableKey,
-          {TasksTableKeys.taskIsRecurringKey: 0},
-          where: '${DayTasksTableKeys.dayTaskTaskKey} = ?',
+          TasksKeys.table,
+          {TasksKeys.isRecurring: 0},
+          where: '${DayTasksKeys.task} = ?',
           whereArgs: [54],
         ),
       ).thenAnswer((_) async => 1);
@@ -456,18 +456,18 @@ void main() {
 
       verify(
         () => txn.delete(
-          DayTasksTableKeys.dayTasksTableKey,
+          DayTasksKeys.table,
           where:
-              '${DayTasksTableKeys.dayTaskDayKey} = ? AND ${DayTasksTableKeys.dayTaskTaskKey} = ?',
+              '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
           whereArgs: [sampleDay, 54],
         ),
       ).called(1);
 
       verify(
         () => txn.update(
-          TasksTableKeys.tasksTableKey,
-          {TasksTableKeys.taskIsRecurringKey: 0},
-          where: '${TasksTableKeys.taskIdKey} = ?',
+          TasksKeys.table,
+          {TasksKeys.isRecurring: 0},
+          where: '${TasksKeys.id} = ?',
           whereArgs: [54],
         ),
       ).called(1);

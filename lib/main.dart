@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:vedem/init_dependencies.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initDependencies();
+  await serviceLocator.allReady(timeout: Duration(seconds: 3));
   runApp(const MainApp());
 }
 

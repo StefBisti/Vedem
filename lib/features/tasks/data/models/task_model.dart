@@ -32,12 +32,12 @@ class TaskModel extends TaskEntity {
 
   factory TaskModel.fromMap(Map<String, dynamic> map) {
     return TaskModel(
-      taskId: (map[TasksTableKeys.taskIdKey] ?? 0) as int,
-      categoryId: (map[TasksTableKeys.taskCategoryIdKey] ?? 0) as int,
-      content: (map[TasksTableKeys.taskContentKey] ?? '') as String,
-      isRecurring: ((map[TasksTableKeys.taskIsRecurringKey] ?? 0) as int) == 1,
-      diamonds: (map[TasksTableKeys.taskDiamondsKey] ?? 0) as int,
-      isDone: ((map[DayTasksTableKeys.dayTaskDoneKey] ?? 0) as int) == 1,
+      taskId: (map[TasksKeys.id] ?? 0) as int,
+      categoryId: (map[TasksKeys.categoryId] ?? 0) as int,
+      content: (map[TasksKeys.content] ?? '') as String,
+      isRecurring: ((map[TasksKeys.isRecurring] ?? 0) as int) == 1,
+      diamonds: (map[TasksKeys.diamonds] ?? 0) as int,
+      isDone: ((map[DayTasksKeys.done] ?? 0) as int) == 1,
     );
   }
   

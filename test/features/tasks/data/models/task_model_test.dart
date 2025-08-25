@@ -13,19 +13,19 @@ void main(){
   });
 
   final sampleDbRow1 = {
-    TasksTableKeys.taskIdKey: 54,
-    TasksTableKeys.taskCategoryIdKey: 1,
-    TasksTableKeys.taskContentKey: 'test',
-    TasksTableKeys.taskIsRecurringKey: 1,
-    TasksTableKeys.taskDiamondsKey: 34,
-    DayTasksTableKeys.dayTaskDoneKey: 0,
+    TasksKeys.id: 54,
+    TasksKeys.categoryId: 1,
+    TasksKeys.content: 'test',
+    TasksKeys.isRecurring: 1,
+    TasksKeys.diamonds: 34,
+    DayTasksKeys.done: 0,
   };
   final sampleDbRow2 = {
-    TasksTableKeys.taskIdKey: 54,
-    TasksTableKeys.taskCategoryIdKey: 1,
-    TasksTableKeys.taskContentKey: 'test',
-    TasksTableKeys.taskIsRecurringKey: 1,
-    TasksTableKeys.taskDiamondsKey: 34,
+    TasksKeys.id: 54,
+    TasksKeys.categoryId: 1,
+    TasksKeys.content: 'test',
+    TasksKeys.isRecurring: 1,
+    TasksKeys.diamonds: 34,
   };
   final TaskModel sampleTask = TaskModel(
     taskId: 54,

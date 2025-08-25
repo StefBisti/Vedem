@@ -34,31 +34,31 @@ void main() {
         version: 1,
         onCreate: (db, version) async {
           await db.execute('''
-            CREATE TABLE ${TasksTableKeys.tasksTableKey} (
-              ${TasksTableKeys.taskIdKey} INTEGER PRIMARY KEY AUTOINCREMENT,
-              ${TasksTableKeys.taskCategoryIdKey} INTEGER NOT NULL,
-              ${TasksTableKeys.taskContentKey} TEXT NOT NULL,
-              ${TasksTableKeys.taskIsRecurringKey} INTEGER NOT NULL,
-              ${TasksTableKeys.taskDiamondsKey} INTEGER NOT NULL
+            CREATE TABLE ${TasksKeys.table} (
+              ${TasksKeys.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+              ${TasksKeys.categoryId} INTEGER NOT NULL,
+              ${TasksKeys.content} TEXT NOT NULL,
+              ${TasksKeys.isRecurring} INTEGER NOT NULL,
+              ${TasksKeys.diamonds} INTEGER NOT NULL
             )
           ''');
           await db.execute('''
-            CREATE TABLE ${DayTasksTableKeys.dayTasksTableKey} (
-              ${DayTasksTableKeys.dayTaskIdKey} INTEGER PRIMARY KEY AUTOINCREMENT,
-              ${DayTasksTableKeys.dayTaskDayKey} TEXT NOT NULL,
-              ${DayTasksTableKeys.dayTaskTaskKey} INTEGER NOT NULL,
-              ${DayTasksTableKeys.dayTaskDoneKey} INTEGER NOT NULL DEFAULT 0,
-              FOREIGN KEY (${DayTasksTableKeys.dayTaskTaskKey}) REFERENCES ${TasksTableKeys.tasksTableKey} (${TasksTableKeys.taskIdKey})
+            CREATE TABLE ${DayTasksKeys.table} (
+              ${DayTasksKeys.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+              ${DayTasksKeys.day} TEXT NOT NULL,
+              ${DayTasksKeys.task} INTEGER NOT NULL,
+              ${DayTasksKeys.done} INTEGER NOT NULL DEFAULT 0,
+              FOREIGN KEY (${DayTasksKeys.task}) REFERENCES ${TasksKeys.table} (${TasksKeys.id})
             );
           ''');
           await db.execute(
-            'CREATE INDEX idx_tasks_category_id ON ${TasksTableKeys.tasksTableKey}(${TasksTableKeys.taskCategoryIdKey});',
+            'CREATE INDEX idx_tasks_category_id ON ${TasksKeys.table}(${TasksKeys.categoryId});',
           );
           await db.execute(
-            'CREATE INDEX idx_day_tasks_task_id ON ${DayTasksTableKeys.dayTasksTableKey}(${DayTasksTableKeys.dayTaskTaskKey});',
+            'CREATE INDEX idx_day_tasks_task_id ON ${DayTasksKeys.table}(${DayTasksKeys.task});',
           );
           await db.execute(
-            'CREATE INDEX idx_day_tasks_day_id ON ${DayTasksTableKeys.dayTasksTableKey}(${DayTasksTableKeys.dayTaskDayKey});',
+            'CREATE INDEX idx_day_tasks_day_id ON ${DayTasksKeys.table}(${DayTasksKeys.day});',
           );
         },
       ),
@@ -160,17 +160,17 @@ void main() {
     test(
       'When only non-recurring tasks in the db, the return should be empty, nothing added to the db',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.categoryId: sampleTask1.taskId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.categoryId: sampleTask2.taskId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
 
         final tasksRows = await db.query('tasks');
@@ -198,19 +198,19 @@ void main() {
     test(
       'When only recurring tasks in the db, the return should be those recurring tasks, they are added to the db',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask3.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask3.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask3.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask3.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask3.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask3.taskId,
+          TasksKeys.categoryId: sampleTask3.categoryId,
+          TasksKeys.content: sampleTask3.content,
+          TasksKeys.isRecurring: sampleTask3.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask3.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask4.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask4.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask4.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask4.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask4.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask4.taskId,
+          TasksKeys.categoryId: sampleTask4.categoryId,
+          TasksKeys.content: sampleTask4.content,
+          TasksKeys.isRecurring: sampleTask4.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask4.diamonds,
         });
 
         final tasksRows = await db.query('tasks');
@@ -245,33 +245,33 @@ void main() {
     test(
       'When both recurring and non-recurring tasks in the db, the return should be those recurring tasks, they are added to the db',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask3.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask3.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask3.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask3.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask3.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask3.taskId,
+          TasksKeys.categoryId: sampleTask3.categoryId,
+          TasksKeys.content: sampleTask3.content,
+          TasksKeys.isRecurring: sampleTask3.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask3.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask4.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask4.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask4.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask4.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask4.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask4.taskId,
+          TasksKeys.categoryId: sampleTask4.categoryId,
+          TasksKeys.content: sampleTask4.content,
+          TasksKeys.isRecurring: sampleTask4.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask4.diamonds,
         });
 
         final tasksRows = await db.query('tasks');
@@ -334,29 +334,29 @@ void main() {
     test(
       'When no tasks in db for the selected day, the return should be empty, nothing added to the db',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final tasksRows = await db.query('tasks');
@@ -384,29 +384,29 @@ void main() {
     test(
       'When there are tasks for both the selected day and other day, the return should contain the selected day\'s tasks',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId2,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId2,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final tasksRows = await db.query('tasks');
@@ -435,34 +435,34 @@ void main() {
       },
     );
     test('When no corresponding task id, simply skip it', () async {
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask1.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask1.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask1.taskId,
+        TasksKeys.categoryId: sampleTask1.categoryId,
+        TasksKeys.content: sampleTask1.content,
+        TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask1.diamonds,
       });
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask2.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask2.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask2.taskId,
+        TasksKeys.categoryId: sampleTask2.categoryId,
+        TasksKeys.content: sampleTask2.content,
+        TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask2.diamonds,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask1.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask2.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask3.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask3.taskId,
+        DayTasksKeys.done: 0,
       });
 
       final tasksRows = await db.query('tasks');
@@ -524,29 +524,29 @@ void main() {
     test(
       'When no tasks in db for the selected month, the return should be empty, nothing added to the db',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final tasksRows = await db.query('tasks');
@@ -574,29 +574,29 @@ void main() {
     test(
       'When there are tasks for both the selected month and other month, the return should contain the selected month\'s tasks',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: '2025-09-10',
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: '2025-09-10',
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId2,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId2,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final tasksRows = await db.query('tasks');
@@ -625,34 +625,34 @@ void main() {
       },
     );
     test('When no corresponding task id, simply skip it', () async {
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask1.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask1.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask1.taskId,
+        TasksKeys.categoryId: sampleTask1.categoryId,
+        TasksKeys.content: sampleTask1.content,
+        TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask1.diamonds,
       });
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask2.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask2.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask2.taskId,
+        TasksKeys.categoryId: sampleTask2.categoryId,
+        TasksKeys.content: sampleTask2.content,
+        TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask2.diamonds,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask1.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask2.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask3.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: sampleDayId1,
+        DayTasksKeys.task: sampleTask3.taskId,
+        DayTasksKeys.done: 0,
       });
 
       final tasksRows = await db.query('tasks');
@@ -684,41 +684,41 @@ void main() {
       await queue.cancel();
     });
     test('Reading tasks for december works as expected', () async {
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask1.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask1.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask1.taskId,
+        TasksKeys.categoryId: sampleTask1.categoryId,
+        TasksKeys.content: sampleTask1.content,
+        TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask1.diamonds,
       });
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask2.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask2.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask2.taskId,
+        TasksKeys.categoryId: sampleTask2.categoryId,
+        TasksKeys.content: sampleTask2.content,
+        TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask2.diamonds,
       });
-      await db.insert(TasksTableKeys.tasksTableKey, {
-        TasksTableKeys.taskIdKey: sampleTask3.taskId,
-        TasksTableKeys.taskCategoryIdKey: sampleTask3.categoryId,
-        TasksTableKeys.taskContentKey: sampleTask3.content,
-        TasksTableKeys.taskIsRecurringKey: sampleTask3.isRecurring ? 1 : 0,
-        TasksTableKeys.taskDiamondsKey: sampleTask3.diamonds,
+      await db.insert(TasksKeys.table, {
+        TasksKeys.id: sampleTask3.taskId,
+        TasksKeys.categoryId: sampleTask3.categoryId,
+        TasksKeys.content: sampleTask3.content,
+        TasksKeys.isRecurring: sampleTask3.isRecurring ? 1 : 0,
+        TasksKeys.diamonds: sampleTask3.diamonds,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: '2025-11-18',
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: '2025-11-18',
+        DayTasksKeys.task: sampleTask1.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: '2025-12-19',
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: '2025-12-19',
+        DayTasksKeys.task: sampleTask2.taskId,
+        DayTasksKeys.done: 0,
       });
-      await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-        DayTasksTableKeys.dayTaskDayKey: '2026-01-10',
-        DayTasksTableKeys.dayTaskTaskKey: sampleTask3.taskId,
-        DayTasksTableKeys.dayTaskDoneKey: 0,
+      await db.insert(DayTasksKeys.table, {
+        DayTasksKeys.day: '2026-01-10',
+        DayTasksKeys.task: sampleTask3.taskId,
+        DayTasksKeys.done: 0,
       });
 
       final tasksRows = await db.query('tasks');
@@ -783,10 +783,10 @@ void main() {
         expect(tasksRows1.length, 1);
         expect(dayTasksRows1.length, 1);
         expect(TaskModel.fromMap(tasksRows1[0]).toEntity(), sampleTask1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDoneKey], 0);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskTaskKey], 1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows1[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows1[0][DayTasksKeys.done], 0);
+        expect(dayTasksRows1[0][DayTasksKeys.task], 1);
+        expect(dayTasksRows1[0][DayTasksKeys.id], 1);
 
         await queue.cancel();
       },
@@ -826,10 +826,10 @@ void main() {
         expect(tasksRows1.length, 1);
         expect(dayTasksRows1.length, 1);
         expect(TaskModel.fromMap(tasksRows1[0]).toEntity(), sampleTask1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDoneKey], 0);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskTaskKey], 1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows1[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows1[0][DayTasksKeys.done], 0);
+        expect(dayTasksRows1[0][DayTasksKeys.task], 1);
+        expect(dayTasksRows1[0][DayTasksKeys.id], 1);
 
         bloc.add(
           CreateNewTaskEvent(
@@ -867,14 +867,14 @@ void main() {
         expect(dayTasksRows2.length, 2);
         expect(TaskModel.fromMap(tasksRows2[0]).toEntity(), sampleTask1);
         expect(TaskModel.fromMap(tasksRows2[1]).toEntity(), sampleTask2);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskDoneKey], 0);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskTaskKey], 1);
-        expect(dayTasksRows1[0][DayTasksTableKeys.dayTaskIdKey], 1);
-        expect(dayTasksRows2[1][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows2[1][DayTasksTableKeys.dayTaskDoneKey], 0);
-        expect(dayTasksRows2[1][DayTasksTableKeys.dayTaskTaskKey], 2);
-        expect(dayTasksRows2[1][DayTasksTableKeys.dayTaskIdKey], 2);
+        expect(dayTasksRows1[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows1[0][DayTasksKeys.done], 0);
+        expect(dayTasksRows1[0][DayTasksKeys.task], 1);
+        expect(dayTasksRows1[0][DayTasksKeys.id], 1);
+        expect(dayTasksRows2[1][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows2[1][DayTasksKeys.done], 0);
+        expect(dayTasksRows2[1][DayTasksKeys.task], 2);
+        expect(dayTasksRows2[1][DayTasksKeys.id], 2);
 
         await queue.cancel();
       },
@@ -931,10 +931,10 @@ void main() {
         expect(tasksRows.length, 1);
         expect(dayTasksRows.length, 1);
         expect(TaskModel.fromMap(tasksRows[0]).toEntity(), sampleTask1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 0);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], 1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 0);
+        expect(dayTasksRows[0][DayTasksKeys.task], 1);
+        expect(dayTasksRows[0][DayTasksKeys.id], 1);
 
         queue.cancel();
       },
@@ -945,29 +945,29 @@ void main() {
     test(
       'When updating a task for any day, the task gets updated optimistically',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final queue = StreamQueue<TasksState>(bloc.stream);
@@ -1031,20 +1031,20 @@ void main() {
           sampleTask1.copyWith(content: 'updated 1'),
         );
         expect(TaskModel.fromMap(tasksRows[1]).toEntity(), sampleTask2);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[0][DayTasksKeys.task],
           sampleTask1.taskId,
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 1);
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[0][DayTasksKeys.id], 1);
+        expect(dayTasksRows[1][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[1][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[1][DayTasksKeys.task],
           sampleTask2.taskId,
         );
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskIdKey], 2);
+        expect(dayTasksRows[1][DayTasksKeys.id], 2);
 
         await queue.cancel();
       },
@@ -1079,29 +1079,29 @@ void main() {
     test(
       'When deleting a non-recurring task from any day, the task gets deleted optimistically only for that day',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final queue = StreamQueue<TasksState>(bloc.stream);
@@ -1142,13 +1142,13 @@ void main() {
         expect(dayTasksRows.length, 1);
         expect(TaskModel.fromMap(tasksRows[0]).toEntity(), sampleTask1);
         expect(TaskModel.fromMap(tasksRows[1]).toEntity(), sampleTask2);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[0][DayTasksKeys.task],
           sampleTask2.taskId,
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 2);
+        expect(dayTasksRows[0][DayTasksKeys.id], 2);
 
         await queue.cancel();
       },
@@ -1156,29 +1156,29 @@ void main() {
     test(
       'When deleting a recurring task from any day, the task gets deleted optimistically only for that day and becomes non-recurring',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask3.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask3.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask3.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask3.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask3.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask3.taskId,
+          TasksKeys.categoryId: sampleTask3.categoryId,
+          TasksKeys.content: sampleTask3.content,
+          TasksKeys.isRecurring: sampleTask3.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask3.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask3.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask3.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final queue = StreamQueue<TasksState>(bloc.stream);
@@ -1224,13 +1224,13 @@ void main() {
           TaskModel.fromMap(tasksRows[1]).toEntity(),
           sampleTask3.copyWith(isRecurring: false),
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[0][DayTasksKeys.task],
           sampleTask2.taskId,
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows[0][DayTasksKeys.id], 1);
 
         await queue.cancel();
       },
@@ -1238,29 +1238,29 @@ void main() {
     test(
       'When deleting a task from a month, the task gets deleted completely',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask3.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask3.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask3.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask3.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask3.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask3.taskId,
+          TasksKeys.categoryId: sampleTask3.categoryId,
+          TasksKeys.content: sampleTask3.content,
+          TasksKeys.isRecurring: sampleTask3.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask3.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId2,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask3.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId2,
+          DayTasksKeys.task: sampleTask3.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final queue = StreamQueue<TasksState>(bloc.stream);
@@ -1298,13 +1298,13 @@ void main() {
         expect(tasksRows.length, 1);
         expect(dayTasksRows.length, 1);
         expect(TaskModel.fromMap(tasksRows[0]).toEntity(), sampleTask2);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[0][DayTasksKeys.task],
           sampleTask2.taskId,
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows[0][DayTasksKeys.id], 1);
 
         await queue.cancel();
       },
@@ -1338,29 +1338,29 @@ void main() {
     test(
       'When setting a task for any day, the task gets set optimistically',
       () async {
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask1.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask1.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask1.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask1.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask1.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask1.taskId,
+          TasksKeys.categoryId: sampleTask1.categoryId,
+          TasksKeys.content: sampleTask1.content,
+          TasksKeys.isRecurring: sampleTask1.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask1.diamonds,
         });
-        await db.insert(TasksTableKeys.tasksTableKey, {
-          TasksTableKeys.taskIdKey: sampleTask2.taskId,
-          TasksTableKeys.taskCategoryIdKey: sampleTask2.categoryId,
-          TasksTableKeys.taskContentKey: sampleTask2.content,
-          TasksTableKeys.taskIsRecurringKey: sampleTask2.isRecurring ? 1 : 0,
-          TasksTableKeys.taskDiamondsKey: sampleTask2.diamonds,
+        await db.insert(TasksKeys.table, {
+          TasksKeys.id: sampleTask2.taskId,
+          TasksKeys.categoryId: sampleTask2.categoryId,
+          TasksKeys.content: sampleTask2.content,
+          TasksKeys.isRecurring: sampleTask2.isRecurring ? 1 : 0,
+          TasksKeys.diamonds: sampleTask2.diamonds,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask1.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask1.taskId,
+          DayTasksKeys.done: 0,
         });
-        await db.insert(DayTasksTableKeys.dayTasksTableKey, {
-          DayTasksTableKeys.dayTaskDayKey: sampleDayId1,
-          DayTasksTableKeys.dayTaskTaskKey: sampleTask2.taskId,
-          DayTasksTableKeys.dayTaskDoneKey: 0,
+        await db.insert(DayTasksKeys.table, {
+          DayTasksKeys.day: sampleDayId1,
+          DayTasksKeys.task: sampleTask2.taskId,
+          DayTasksKeys.done: 0,
         });
 
         final queue = StreamQueue<TasksState>(bloc.stream);
@@ -1413,21 +1413,21 @@ void main() {
         expect(dayTasksRows.length, 2);
         expect(TaskModel.fromMap(tasksRows[0]).toEntity(), sampleTask1);
         expect(TaskModel.fromMap(tasksRows[1]).toEntity(), sampleTask2);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
+        expect(dayTasksRows[0][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[0][DayTasksKeys.done], 1);
         expect(
-          dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[0][DayTasksKeys.task],
           sampleTask1.taskId,
         );
-        expect(dayTasksRows[0][DayTasksTableKeys.dayTaskIdKey], 1);
+        expect(dayTasksRows[0][DayTasksKeys.id], 1);
 
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], sampleDayId1);
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 0);
+        expect(dayTasksRows[1][DayTasksKeys.day], sampleDayId1);
+        expect(dayTasksRows[1][DayTasksKeys.done], 0);
         expect(
-          dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey],
+          dayTasksRows[1][DayTasksKeys.task],
           sampleTask2.taskId,
         );
-        expect(dayTasksRows[1][DayTasksTableKeys.dayTaskIdKey], 2);
+        expect(dayTasksRows[1][DayTasksKeys.id], 2);
 
         await queue.cancel();
       },
@@ -1632,14 +1632,14 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[2]).toEntity(), t3);
       expect(TaskModel.fromMap(tasksRows[3]).toEntity(), t4);
       expect(dayTasksRows.length, 4);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
 
       // sets 2 recurring tasks and one non-recurring - check if correctly set in the db
       bloc.add(
@@ -1736,18 +1736,18 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[2]).toEntity(), t3);
       expect(TaskModel.fromMap(tasksRows[3]).toEntity(), t4);
       expect(dayTasksRows.length, 4);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
 
       // initializes another day - check if it has the recurring tasks
       bloc.add(InitializeTasksForDayEvent(dayId: '2025-08-23'));
@@ -1767,27 +1767,27 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[2]).toEntity(), t3);
       expect(TaskModel.fromMap(tasksRows[3]).toEntity(), t4);
       expect(dayTasksRows.length, 7);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 0);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
+      expect(dayTasksRows[6][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[6][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[6][DayTasksKeys.done], 0);
 
       // adds one more non-recurring task - check if correctly added in the db
       bloc.add(
@@ -1821,30 +1821,30 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[4]).toEntity(), t5);
       expect(t5.isRecurring, false);
       expect(dayTasksRows.length, 8);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskTaskKey], t5.taskId);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 0);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
+      expect(dayTasksRows[6][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[6][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[6][DayTasksKeys.done], 0);
+      expect(dayTasksRows[7][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[7][DayTasksKeys.task], t5.taskId);
+      expect(dayTasksRows[7][DayTasksKeys.done], 0);
 
       // sets one recurring task - check if correctly set in the db
       bloc.add(
@@ -1876,30 +1876,30 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[4]).toEntity(), t5);
       expect(t5.isRecurring, false);
       expect(dayTasksRows.length, 8);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskTaskKey], t5.taskId);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 1);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
+      expect(dayTasksRows[6][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[6][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[6][DayTasksKeys.done], 0);
+      expect(dayTasksRows[7][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[7][DayTasksKeys.task], t5.taskId);
+      expect(dayTasksRows[7][DayTasksKeys.done], 0);
 
       // updates another recurring task - check if correctly set in the db
       bloc.add(
@@ -1990,27 +1990,27 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[3]).toEntity(), t4);
       expect(TaskModel.fromMap(tasksRows[4]).toEntity(), t5);
       expect(dayTasksRows.length, 7);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskTaskKey], t5.taskId);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 1);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
+      expect(dayTasksRows[6][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[6][DayTasksKeys.task], t5.taskId);
+      expect(dayTasksRows[6][DayTasksKeys.done], 0);
 
       // deletes the non-recurring task from today - check if correctly set in the db
       bloc.add(DeleteTaskEvent(dayId: '2025-08-23', taskId: t5.taskId));
@@ -2051,24 +2051,24 @@ void main() {
       expect(TaskModel.fromMap(tasksRows[3]).toEntity(), t4);
       expect(TaskModel.fromMap(tasksRows[4]).toEntity(), t5);
       expect(dayTasksRows.length, 6);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 1);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
 
       // reads tasks from previous day - check if they are all there, with the one updated correctly
       bloc.add(ReadTasksForDayEvent(dayId: '2025-08-22'));
@@ -2109,30 +2109,30 @@ void main() {
       );
       dayTasksRows = await db.query('day_tasks');
       expect(dayTasksRows.length, 8);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t4.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[4][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[5][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDayKey], '2025-08-24');
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[6][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDayKey], '2025-08-24');
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskTaskKey], t2.taskId);
-      expect(dayTasksRows[7][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 1);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[2][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 0);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[3][DayTasksKeys.task], t4.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 1);
+      expect(dayTasksRows[4][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[4][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[4][DayTasksKeys.done], 1);
+      expect(dayTasksRows[5][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[5][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[5][DayTasksKeys.done], 0);
+      expect(dayTasksRows[6][DayTasksKeys.day], '2025-08-24');
+      expect(dayTasksRows[6][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[6][DayTasksKeys.done], 0);
+      expect(dayTasksRows[7][DayTasksKeys.day], '2025-08-24');
+      expect(dayTasksRows[7][DayTasksKeys.task], t2.taskId);
+      expect(dayTasksRows[7][DayTasksKeys.done], 0);
 
       // gets all tasks for current month - check if they are all there, including the deleted non-recurring
       bloc.add(ReadTasksForMonthEvent(monthId: '2025-08'));
@@ -2201,18 +2201,18 @@ void main() {
       );
       expect(TaskModel.fromMap(tasksRows[2]).toEntity(), t5);
       expect(dayTasksRows.length, 4);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[0][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDayKey], '2025-08-22');
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskTaskKey], t3.taskId);
-      expect(dayTasksRows[1][DayTasksTableKeys.dayTaskDoneKey], 0);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDayKey], '2025-08-23');
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[2][DayTasksTableKeys.dayTaskDoneKey], 1);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDayKey], '2025-08-24');
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskTaskKey], t1.taskId);
-      expect(dayTasksRows[3][DayTasksTableKeys.dayTaskDoneKey], 0);
+      expect(dayTasksRows[0][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[0][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[0][DayTasksKeys.done], 1);
+      expect(dayTasksRows[1][DayTasksKeys.day], '2025-08-22');
+      expect(dayTasksRows[1][DayTasksKeys.task], t3.taskId);
+      expect(dayTasksRows[1][DayTasksKeys.done], 0);
+      expect(dayTasksRows[2][DayTasksKeys.day], '2025-08-23');
+      expect(dayTasksRows[2][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[2][DayTasksKeys.done], 1);
+      expect(dayTasksRows[3][DayTasksKeys.day], '2025-08-24');
+      expect(dayTasksRows[3][DayTasksKeys.task], t1.taskId);
+      expect(dayTasksRows[3][DayTasksKeys.done], 0);
 
       // reads tasks from first day - check if the recurring and non-recurring are gone
       bloc.add(ReadTasksForDayEvent(dayId: '2025-08-22'));
