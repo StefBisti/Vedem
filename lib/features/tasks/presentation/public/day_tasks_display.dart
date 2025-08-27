@@ -103,7 +103,7 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
               SizedBox(height: 20.0),
               TextButton.icon(
                 onPressed: () {
-                  CreateTaskPage.route(context, widget.dayId);
+                  CreateTaskPage.route(context, context.read<TasksBloc>(), widget.dayId);
                 },
                 label: Text(
                   'Create new task today',

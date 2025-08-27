@@ -95,7 +95,11 @@ class TaskWidgetBody extends StatelessWidget {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  UpdateTaskPage.route(context, taskId);
+                  UpdateTaskPage.route(
+                    context,
+                    context.read<TasksBloc>(),
+                    taskId,
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(

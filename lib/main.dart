@@ -12,6 +12,8 @@ void main() async {
   runApp(const MainApp());
 }
 
+// add get all tasks
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
