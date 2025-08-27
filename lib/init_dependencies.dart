@@ -70,9 +70,8 @@ Future<void> _initTasks() async {
   );
 
   // External
-  serviceLocator.registerLazySingletonAsync<Database>(() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentsDirectory.path, 'my_app.db');
-    return await AppDatabase.open(path);
-  });
+  Directory documentsDirectory = await getApplicationDocumentsDirectory();
+  final path = join(documentsDirectory.path, 'my_app.db');
+  final db = await AppDatabase.open(path);
+  serviceLocator.registerLazySingleton<Database>(() => db);
 }

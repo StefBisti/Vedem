@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
 
 class MiscUtils {
   static void debugPrint() {
@@ -30,4 +31,25 @@ class MiscUtils {
 
   static double invLerp(double min, double max, double val) =>
       (val - min) / (max - min);
+
+  static Future<void> dumpDatabaseToConsole(Database db) async {
+    if (kDebugMode == false) return;
+
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';",
+    );
+
+    for (final row in tables) {
+      final table = row['name'] as String;
+      final rows = await db.query(table);
+      if (kDebugMode) {
+        print('--- TABLE: $table (${rows.length} rows) ---');
+      }
+      for (final r in rows) {
+        if (kDebugMode) {
+          print(r); // Map<String, dynamic>
+        }
+      }
+    }
+  }
 }

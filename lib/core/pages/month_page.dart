@@ -3,19 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
-import 'package:vedem/features/tasks/presentation/public/day_tasks_display.dart';
+import 'package:vedem/features/tasks/presentation/public/month_tasks_display.dart';
 
-class DayPage extends StatelessWidget {
-  static void route(BuildContext context, String dayId) {
+class MonthPage extends StatelessWidget {
+  static void route(BuildContext context, String monthId) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => DayPage(dayId: dayId)),
+      MaterialPageRoute(builder: (context) => MonthPage(monthId: monthId)),
     );
   }
 
-  final String dayId;
+  final String monthId;
 
-  const DayPage({super.key, required this.dayId});
+  const MonthPage({super.key, required this.monthId});
 
   @override
   Widget build(BuildContext context) {
@@ -24,18 +24,18 @@ class DayPage extends StatelessWidget {
         BlocProvider(
           create: (_) =>
               GetIt.instance<TasksBloc>()
-                ..add(ReadTasksForDayEvent(dayId: dayId)),
+                ..add(ReadTasksForMonthEvent(monthId: monthId)),
         ),
       ],
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Day Page: $dayId', style: AppTextStyles.heading),
+          title: Text('Month Page: $monthId', style: AppTextStyles.heading),
         ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [DayTasksDisplay(dayId: dayId)],
+            children: [MonthTasksDisplay()],
           ),
         ),
       ),
