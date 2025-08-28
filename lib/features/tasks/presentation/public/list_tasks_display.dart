@@ -10,14 +10,14 @@ import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:vedem/features/tasks/presentation/private/task_widget.dart';
 
-class MonthTasksDisplay extends StatefulWidget {
-  const MonthTasksDisplay({super.key});
+class ListTasksDisplay extends StatefulWidget {
+  const ListTasksDisplay({super.key});
 
   @override
-  State<MonthTasksDisplay> createState() => _MonthTasksDisplayState();
+  State<ListTasksDisplay> createState() => _ListTasksDisplayState();
 }
 
-class _MonthTasksDisplayState extends State<MonthTasksDisplay> {
+class _ListTasksDisplayState extends State<ListTasksDisplay> {
   final categoryColors = const [
     Colors.red,
     Colors.blue,
@@ -26,7 +26,9 @@ class _MonthTasksDisplayState extends State<MonthTasksDisplay> {
     Colors.black,
   ];
 
-  late TextEditingController dayController, monthController, createTaskDayController;
+  late TextEditingController dayController,
+      monthController,
+      createTaskDayController;
 
   @override
   void initState() {
@@ -78,9 +80,13 @@ class _MonthTasksDisplayState extends State<MonthTasksDisplay> {
                 SizedBox(height: 20.0),
                 Text('Tasks this month', style: AppTextStyles.heading),
                 for (TaskEntity task in state.tasks)
-                  TaskWidget(dayId: null, task: task, categoryColors: categoryColors),
+                  TaskWidget(
+                    dayId: null,
+                    task: task,
+                    categoryColors: categoryColors,
+                  ),
 
-                SizedBox(height: 60.0,),
+                SizedBox(height: 60.0),
 
                 // Read tasks for day part
                 Row(
@@ -183,7 +189,11 @@ class _MonthTasksDisplayState extends State<MonthTasksDisplay> {
                   children: [
                     TextButton.icon(
                       onPressed: () {
-                        CreateTaskPage.route(context, createTaskDayController.text);
+                        CreateTaskPage.route(
+                          context,
+                          context.read<TasksBloc>(),
+                          createTaskDayController.text,
+                        );
                       },
                       label: Text(
                         'Create task for any day',

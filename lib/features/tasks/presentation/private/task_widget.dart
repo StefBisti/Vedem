@@ -26,6 +26,7 @@ class _TaskWidgetState extends State<TaskWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   double _maxSlide = 0.0;
+  bool animateDone = false;
 
   @override
   void initState() {
@@ -50,14 +51,9 @@ class _TaskWidgetState extends State<TaskWidget>
       final renderBox = context.findRenderObject() as RenderBox;
       _maxSlide = renderBox.size.height;
       _animationController.forward().whenComplete(() {
-        context.read<TasksBloc>().add(
-          SetTaskEvent(
-            dayId: widget.dayId!,
-            taskId: widget.task.taskId,
-            completed: true,
-          ),
-        );
-        _animationController.value = 0.0;
+        setState(() {
+          animateDone = true;
+        });
       });
     } else {
       context.read<TasksBloc>().add(
@@ -68,6 +64,17 @@ class _TaskWidgetState extends State<TaskWidget>
         ),
       );
     }
+  }
+
+  void _onClaim(int diamonds) {
+    context.read<TasksBloc>().add(
+      SetTaskEvent(
+        dayId: widget.dayId!,
+        taskId: widget.task.taskId,
+        completed: true,
+      ),
+    );
+    _animationController.value = 0.0;
   }
 
   @override
@@ -89,11 +96,7 @@ class _TaskWidgetState extends State<TaskWidget>
                   child: TaskWidgetBody(
                     dayId: widget.dayId,
                     taskId: widget.task.taskId,
-                    color:
-                        widget.categoryColors[min(
-                          widget.task.categoryId,
-                          widget.categoryColors.length - 1,
-                        )],
+                    categoryIndex: widget.task.categoryId,
                     content: widget.task.content,
                     diamonds: widget.task.diamonds,
                     isRecurring: widget.task.isRecurring,
@@ -113,11 +116,16 @@ class _TaskWidgetState extends State<TaskWidget>
                       ..setEntry(3, 2, 0.002)
                       ..rotateX(-pi / 2 * (1 - _animationController.value)),
                     child: TaskWidgetDone(
+                      animate: animateDone,
                       color:
                           widget.categoryColors[min(
                             widget.task.categoryId,
                             widget.categoryColors.length - 1,
                           )],
+                      notGreatDiamonds: (widget.task.diamonds * 0.8).round(),
+                      onPointDiamonds: widget.task.diamonds,
+                      awesomeDiamonds: (widget.task.diamonds * 1.2).round(),
+                      onClaim: _onClaim,
                     ),
                   ),
                 ),

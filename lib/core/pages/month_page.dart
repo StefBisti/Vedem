@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
-import 'package:vedem/features/tasks/presentation/public/month_tasks_display.dart';
+import 'package:vedem/features/tasks/presentation/public/list_tasks_display.dart';
 
 class MonthPage extends StatelessWidget {
   static void route(BuildContext context, String monthId) {
@@ -35,7 +35,7 @@ class MonthPage extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [MonthTasksDisplay()],
+            children: [ListTasksDisplay()],
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MiscUtils {
@@ -51,5 +52,11 @@ class MiscUtils {
         }
       }
     }
+  }
+
+  static void showSnackBar(BuildContext context, String content) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(content)));
   }
 }

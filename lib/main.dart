@@ -12,6 +12,8 @@ void main() async {
   runApp(const MainApp());
 }
 
+// add get all tasks
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -20,7 +22,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Vedem',
-      theme: AppThemes.theme,
+      theme: AppThemes.lightTheme,
       home: DayPage(dayId: '2025-08-27'),
     );
   }
