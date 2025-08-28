@@ -15,7 +15,6 @@ class AppThemes {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(AppStyle.roundedCorners),
         ),
-        overlayColor: Colors.white,
       ),
     ),
   );

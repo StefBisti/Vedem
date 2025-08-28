@@ -203,7 +203,7 @@ class _UpdateTaskDisplayState extends State<UpdateTaskDisplay> {
                         createIcon: Icons.edit,
                         createHidden:
                             selectedCategoryIndex == -1 ||
-                            contentController.text.isEmpty,
+                            contentController.text.trim().isEmpty,
                         onAccept: () {
                           final String? res = _validate();
                           if (res == null) {

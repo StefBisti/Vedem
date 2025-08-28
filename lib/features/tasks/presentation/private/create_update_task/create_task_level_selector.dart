@@ -24,7 +24,7 @@ class CreateTaskLevelSelector extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Row(
-        spacing: 8.0,
+        spacing: 2.0,
         children: [
           for (int i = 0; i < icons.length; i++)
             Expanded(

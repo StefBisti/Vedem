@@ -190,7 +190,7 @@ class _CreateTaskDisplayState extends State<CreateTaskDisplay> {
                         text: 'What will you do',
                         hidden:
                             effort != -1 &&
-                            contentController.text.isNotEmpty &&
+                            contentController.text.trim().isNotEmpty &&
                             !contentFocus.hasFocus,
                       )
                       .animate(
@@ -414,7 +414,7 @@ class _CreateTaskDisplayState extends State<CreateTaskDisplay> {
                         createIcon: Icons.add_rounded,
                         createHidden:
                             selectedCategoryIndex == -1 ||
-                            contentController.text.isEmpty ||
+                            contentController.text.trim().isEmpty ||
                             effort == -1 ||
                             importance == -1 ||
                             minutes == 0,
