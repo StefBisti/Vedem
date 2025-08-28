@@ -9,7 +9,7 @@ class TaskWidgetBody extends StatelessWidget {
   const TaskWidgetBody({
     super.key,
     required this.dayId,
-    required this.color,
+    required this.categoryIndex,
     required this.content,
     required this.diamonds,
     required this.isRecurring,
@@ -19,11 +19,19 @@ class TaskWidgetBody extends StatelessWidget {
 
   final String? dayId;
   final int taskId;
-  final Color color;
+  final int categoryIndex;
   final String content;
   final bool isRecurring;
   final int diamonds;
   final bool isDone;
+
+  final categoryColors = const [
+    Colors.green,
+    Colors.blue,
+    Colors.red,
+    Colors.amber,
+    Colors.black,
+  ];
 
   IconData _getIcon(bool isRecurring, bool isDone) {
     if (isDone) {
@@ -47,6 +55,7 @@ class TaskWidgetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color color = categoryColors[categoryIndex];
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
@@ -99,6 +108,10 @@ class TaskWidgetBody extends StatelessWidget {
                     context,
                     context.read<TasksBloc>(),
                     taskId,
+                    content,
+                    categoryIndex,
+                    isRecurring,
+                    diamonds,
                   );
                 },
                 child: Container(
@@ -109,7 +122,7 @@ class TaskWidgetBody extends StatelessWidget {
                     ),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                  child: Icon(Icons.update_rounded, color: color, size: 16.0),
+                  child: Icon(Icons.edit_rounded, color: color, size: 16.0),
                 ),
               ),
               SizedBox(width: 4.0),

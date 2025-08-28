@@ -8,21 +8,25 @@ class CreateTaskTextField extends StatelessWidget {
     super.key,
     required this.color,
     required this.controller,
+    required this.contentFocus,
   });
 
   final Color color;
   final TextEditingController controller;
+  final FocusNode contentFocus;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: contentFocus,
       cursorColor: AppColors.primaryLightTextColor,
       cursorErrorColor: Colors.red,
       cursorRadius: Radius.circular(double.infinity),
       style: AppTextStyles.heading.copyWith(color: color),
-      maxLines: null,
+      maxLines: 1,
       minLines: 1,
+      keyboardType: TextInputType.text,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         border: OutlineInputBorder(

@@ -6,36 +6,32 @@ import 'package:vedem/features/tasks/presentation/public/create_task_display.dar
 
 class CreateTaskPage extends StatelessWidget {
   final String dayId;
+  final TasksBloc bloc;
 
-  const CreateTaskPage({super.key, required this.dayId});
+  const CreateTaskPage({super.key, required this.dayId, required this.bloc});
 
   static void route(BuildContext context, TasksBloc bloc, String dayId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: bloc,
-          child: CreateTaskPage(dayId: dayId),
-        ),
+        builder: (_) => CreateTaskPage(dayId: dayId, bloc: bloc),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0.0,
-        scrolledUnderElevation: 0.0,
-        elevation: 0.0,
-        backgroundColor: AppColors.darkBackgroundColor.withAlpha(0),
-      ),
-      backgroundColor: AppColors.darkBackgroundColor,
-      extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [CreateTaskDisplay(dayId: dayId)],
+    return BlocProvider.value(
+      value: bloc,
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 0.0,
+          scrolledUnderElevation: 0.0,
+          elevation: 0.0,
+          backgroundColor: AppColors.darkBackgroundColor.withAlpha(0),
         ),
+        backgroundColor: AppColors.darkBackgroundColor,
+        extendBodyBehindAppBar: true,
+        body: CreateTaskDisplay(dayId: dayId),
       ),
     );
   }

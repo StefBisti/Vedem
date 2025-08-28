@@ -35,7 +35,15 @@ class DayPage extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [DayTasksDisplay(dayId: dayId)],
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 200.0,
+                child: ColoredBox(color: Colors.red),
+              ),
+              const SizedBox(height: 16.0,),
+              DayTasksDisplay(dayId: dayId),
+            ],
           ),
         ),
       ),

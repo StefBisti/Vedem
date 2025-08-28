@@ -89,11 +89,7 @@ class _TaskWidgetState extends State<TaskWidget>
                   child: TaskWidgetBody(
                     dayId: widget.dayId,
                     taskId: widget.task.taskId,
-                    color:
-                        widget.categoryColors[min(
-                          widget.task.categoryId,
-                          widget.categoryColors.length - 1,
-                        )],
+                    categoryIndex: widget.task.categoryId,
                     content: widget.task.content,
                     diamonds: widget.task.diamonds,
                     isRecurring: widget.task.isRecurring,

@@ -5,11 +5,17 @@ import 'package:vedem/core/style/app_text_styles.dart';
 // Cancel or Create task
 class CreateTaskDecisionButtons extends StatelessWidget {
   final Function() onCancel, onAccept;
+  final bool createHidden;
+  final String createText;
+  final IconData createIcon;
 
   const CreateTaskDecisionButtons({
     super.key,
+    required this.createHidden,
     required this.onCancel,
     required this.onAccept,
+    required this.createIcon,
+    required this.createText,
   });
 
   @override
@@ -38,24 +44,26 @@ class CreateTaskDecisionButtons extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 16.0,),
+        SizedBox(width: 16.0),
         Expanded(
           child: TextButton.icon(
             onPressed: onAccept,
             label: Text(
-              'Create',
+              createText,
               style: AppTextStyles.content.copyWith(
                 color: AppColors.primaryDarkTextColor,
-                fontWeight: FontWeight.bold
+                fontWeight: FontWeight.bold,
               ),
             ),
             icon: Icon(
-              Icons.add_rounded,
+              createIcon,
               size: 20.0,
               color: AppColors.primaryDarkTextColor,
             ),
             style: TextButton.styleFrom(
-              backgroundColor: AppColors.lightBackgroundColor,
+              backgroundColor: !createHidden
+                  ? AppColors.lightBackgroundColor
+                  : AppColors.secondaryLightTextColor,
             ),
           ),
         ),

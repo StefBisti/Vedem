@@ -22,7 +22,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Vedem',
-      theme: AppThemes.theme,
+      theme: AppThemes.lightTheme,
       home: DayPage(dayId: '2025-08-27'),
     );
   }
