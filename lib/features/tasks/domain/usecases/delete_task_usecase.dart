@@ -33,3 +33,17 @@ class DeleteTaskUseCaseParams extends Equatable {
   @override
   List<Object?> get props => [dayId ?? '', taskId, isRecurring];
 }
+
+class DelayedDeleteTaskUseCase extends DeleteTaskUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedDeleteTaskUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, Unit>> call(
+    DeleteTaskUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}

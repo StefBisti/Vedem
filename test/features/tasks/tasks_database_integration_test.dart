@@ -7,8 +7,14 @@ import 'package:vedem/features/tasks/data/datasources/task_local_data_source.dar
 import 'package:vedem/features/tasks/data/models/task_model.dart';
 import 'package:vedem/features/tasks/data/repositories/task_repository_impl.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
+import 'package:vedem/features/tasks/domain/usecases/create_new_task_use_case.dart';
+import 'package:vedem/features/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:vedem/features/tasks/domain/usecases/initialize_tasks_for_day_use_case.dart';
+import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_day_usecase.dart';
+import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_month_use_case.dart';
+import 'package:vedem/features/tasks/domain/usecases/set_task_usecase.dart';
+import 'package:vedem/features/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
-import 'delayed_usecases/delayed_usecases.dart';
 
 void main() {
   late Database db;

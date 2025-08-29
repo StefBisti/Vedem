@@ -21,6 +21,7 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   await _initTasks();
+  await _initRichInputs();
 }
 
 Future<void> _initTasks() async {
@@ -74,4 +75,10 @@ Future<void> _initTasks() async {
   final path = join(documentsDirectory.path, 'my_app.db');
   final db = await AppDatabase.open(path);
   serviceLocator.registerLazySingleton<Database>(() => db);
+}
+
+Future<void> _initRichInputs() async {
+
+  // External
+  //Box box = await AppHive.initRichInputs();
 }

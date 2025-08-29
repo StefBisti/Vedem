@@ -33,3 +33,17 @@ class SetTaskUseCaseParams extends Equatable {
   @override
   List<Object?> get props => [dayId, taskId, completed];
 }
+
+class DelayedSetTaskUseCase extends SetTaskUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedSetTaskUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, Unit>> call(
+    SetTaskUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}
