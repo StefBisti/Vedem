@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
+import 'package:vedem/features/rich_inputs/presentation/cubit/rich_inputs_cubit.dart';
+import 'package:vedem/features/rich_inputs/presentation/public/rich_input_display.dart';
 import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
 import 'package:vedem/features/tasks/presentation/public/day_tasks_display.dart';
 
@@ -26,6 +28,10 @@ class DayPage extends StatelessWidget {
               GetIt.instance<TasksBloc>()
                 ..add(ReadTasksForDayEvent(dayId: dayId)),
         ),
+        BlocProvider(
+          create: (_) =>
+              GetIt.instance<RichInputsCubit>()..loadRichInput(dayId),
+        ),
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -41,8 +47,10 @@ class DayPage extends StatelessWidget {
                 height: 200.0,
                 child: ColoredBox(color: Colors.red),
               ),
-              const SizedBox(height: 16.0,),
+              const SizedBox(height: 16.0),
               DayTasksDisplay(dayId: dayId),
+              const SizedBox(height: 16.0),
+              RichInputDisplay(richInputKey: dayId),
             ],
           ),
         ),

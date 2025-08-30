@@ -11,16 +11,16 @@ class RichInputsLocalDataSource implements RichInputsDataSource {
   RichInputsLocalDataSource({required this.box});
 
   @override
-  Future<RichInputModel> readRichInput(String dayId) {
+  Future<RichInputModel> readRichInput(String key) {
     try {
       final RichInputModel? richInput = box.get(
-        dayId,
-        defaultValue: RichInputModel.empty(dayId),
+        key,
+        defaultValue: RichInputModel.empty(),
       );
       return Future.value(richInput);
     } catch (e) {
       debugPrint(e.toString());
-      throw LocalDatabaseException(message: loadRichInputError);
+      throw LocalHiveException(message: loadRichInputError);
     }
   }
 
@@ -31,7 +31,7 @@ class RichInputsLocalDataSource implements RichInputsDataSource {
       return Future.value();
     } catch (e) {
       debugPrint(e.toString());
-      throw LocalDatabaseException(message: saveRichInputError);
+      throw LocalHiveException(message: saveRichInputError);
     }
   }
 }

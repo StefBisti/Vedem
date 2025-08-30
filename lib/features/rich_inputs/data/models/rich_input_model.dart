@@ -16,8 +16,8 @@ class RichInputModel extends Equatable {
     parts: e.parts.map((e) => RichInputPartModel.fromEntity(e)).toList(),
   );
 
-  factory RichInputModel.empty(String dayId) => RichInputModel(
-    parts: [],
+  factory RichInputModel.empty() => RichInputModel(
+    parts: [RichInputPartModel.empty()],
   );
 
   @override

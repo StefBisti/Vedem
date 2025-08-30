@@ -10,7 +10,11 @@ class RichInputEntity extends Equatable {
     return RichInputEntity(parts: parts ?? this.parts);
   }
 
-  factory RichInputEntity.empty() => const RichInputEntity(parts: []);
+  void initializePartsIds() {
+    for (int i = 0; i < parts.length; i++) {
+      parts[i] = parts[i].copyWith(id: i);
+    }
+  }
 
   @override
   List<Object?> get props => [parts];

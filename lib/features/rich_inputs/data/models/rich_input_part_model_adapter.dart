@@ -16,7 +16,7 @@ class RichInputPartModelAdapter extends TypeAdapter<RichInputPartModel> {
     return RichInputPartModel(
       type: fields[0] as RichInputType,
       content: fields[1] as String,
-      padding: fields[2] as double,
+      padding: fields[2] as int,
     );
   }
 

@@ -19,10 +19,10 @@ class RichInputsState extends Equatable {
     return RichInputsState(
       richInput: richInput ?? this.richInput,
       isLoading: isLoading ?? this.isLoading,
-      error: error, 
+      error: error,
     );
   }
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [richInput, isLoading, error ?? ''];
 }

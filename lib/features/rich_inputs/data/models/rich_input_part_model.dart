@@ -5,7 +5,8 @@ import '../../domain/entities/rich_input_type.dart';
 class RichInputPartModel extends Equatable {
   final RichInputType type;
   final String content;
-  final double padding;
+  final int
+  padding; // padding is int in the model because it is easier to store
 
   const RichInputPartModel({
     required this.type,
@@ -13,11 +14,21 @@ class RichInputPartModel extends Equatable {
     required this.padding,
   });
 
-  RichInputPartEntity toEntity() =>
-      RichInputPartEntity(type: type, content: content, padding: padding);
+  RichInputPartEntity toEntity() => RichInputPartEntity(
+    type: type,
+    content: content,
+    padding: padding.toDouble(),
+  );
 
   factory RichInputPartModel.fromEntity(RichInputPartEntity e) =>
-      RichInputPartModel(type: e.type, content: e.content, padding: e.padding);
+      RichInputPartModel(
+        type: e.type,
+        content: e.content,
+        padding: e.padding.toInt(),
+      );
+
+  factory RichInputPartModel.empty() =>
+      RichInputPartModel(type: RichInputType.plain, content: '', padding: 0);
 
   @override
   List<Object?> get props => [type, content, padding];
