@@ -43,7 +43,6 @@ class RichInputsCubit extends Cubit<RichInputsState> {
   }
 
   Future<void> saveRichInput(String key, RichInputEntity richInput) async {
-    print('save');
     if (state.isLoading) {
       emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;

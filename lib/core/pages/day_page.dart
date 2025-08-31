@@ -51,6 +51,7 @@ class DayPage extends StatelessWidget {
               DayTasksDisplay(dayId: dayId),
               const SizedBox(height: 16.0),
               RichInputDisplay(richInputKey: dayId),
+              const SizedBox(height: 32.0),
             ],
           ),
         ),
