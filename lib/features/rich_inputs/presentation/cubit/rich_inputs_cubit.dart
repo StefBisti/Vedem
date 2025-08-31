@@ -66,7 +66,9 @@ class RichInputsCubit extends Cubit<RichInputsState> {
 
   @override
   Future<void> close() {
-    _debounce!.cancel();
+    if (_debounce != null) {
+      _debounce!.cancel();
+    }
     return super.close();
   }
 
@@ -77,6 +79,7 @@ class RichInputsCubit extends Cubit<RichInputsState> {
     String text,
     String richInputKey,
     Function(int) onDecorationAddedToId,
+    Function(int) onSplit,
   ) {
     RichInputEntity newRichInput = state.richInput.copyWith();
     newRichInput.parts[index] = newRichInput.parts[index].copyWith(
@@ -97,6 +100,7 @@ class RichInputsCubit extends Cubit<RichInputsState> {
             ? RichInputType.checkboxUnchecked
             : thisType,
       );
+      onSplit(newRichInput.parts[index].id!);
       newRichInput.parts.insert(
         index,
         newRichInput.parts[index].copyWith(
@@ -105,7 +109,6 @@ class RichInputsCubit extends Cubit<RichInputsState> {
           type: thisType,
         ),
       );
-      // onSplit
       emit(state.copyWith(richInput: newRichInput));
       _debounce?.cancel();
       saveRichInput(richInputKey, newRichInput);
@@ -220,10 +223,11 @@ class RichInputsCubit extends Cubit<RichInputsState> {
           newRichInput.parts[index - 1].id!,
         );
         newRichInput.parts.removeAt(index);
+
+        emit(state.copyWith(richInput: newRichInput));
+        _debounce?.cancel();
+        saveRichInput(richInputKey, newRichInput);
       }
-      emit(state.copyWith(richInput: newRichInput));
-      _debounce?.cancel();
-      saveRichInput(richInputKey, newRichInput);
     } else if (index > 0) {
       newRichInput.parts[index - 1] = newRichInput.parts[index - 1].copyWith(
         content:

@@ -130,6 +130,10 @@ class _RichInputDisplayState extends State<RichInputDisplay> {
     );
   }
 
+  void _handleOnSplit(int focusedPartId) {
+    _controllers[focusedPartId]!.selection = TextSelection.collapsed(offset: 0);
+  }
+
   void _onReorder(int oldIndex, int newIndex) {
     context.read<RichInputsCubit>().changeItemIndex(
       oldIndex,
@@ -144,6 +148,7 @@ class _RichInputDisplayState extends State<RichInputDisplay> {
       text,
       widget.richInputKey,
       _handleDecorationAddedToId,
+      _handleOnSplit,
     );
   }
 

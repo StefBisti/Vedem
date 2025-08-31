@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vedem/core/error/error_messages.dart';
 import 'package:vedem/core/error/failures.dart';
-import 'package:vedem/features/rich_inputs/domain/entities/rich_input_entity.dart';
+import 'package:vedem/features/rich_inputs/data/models/rich_input_model.dart';
 import 'package:vedem/features/rich_inputs/domain/usecases/load_rich_input_use_case.dart';
 import 'package:vedem/features/rich_inputs/domain/usecases/save_rich_input_use_case.dart';
 import 'package:vedem/features/rich_inputs/presentation/cubit/rich_inputs_cubit.dart';
@@ -25,7 +25,7 @@ void main() {
   late RichInputsCubit cubit;
 
   const testKey = "2025-08-30";
-  final testEntity = RichInputEntity.empty();
+  final testEntity = RichInputModel.empty().toEntity()..initializePartsIds();
 
   setUp(() {
     load = MockLoadRichInputUseCase();
@@ -43,7 +43,7 @@ void main() {
 
   group("loadRichInput", () {
     blocTest<RichInputsCubit, RichInputsState>(
-      "emits [failure] when isLoading",
+      "emits [failure] when isLoading on load",
       build: () {
         return cubit;
       },
@@ -140,6 +140,4 @@ void main() {
       ],
     );
   });
-
-  group('Text manipulation integration', () {});
 }
