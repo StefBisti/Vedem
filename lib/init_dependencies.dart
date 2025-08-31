@@ -1,9 +1,18 @@
 import 'dart:io';
 import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:vedem/core/database/app_database.dart';
+import 'package:vedem/core/hive/app_hive.dart';
+import 'package:vedem/features/rich_inputs/data/datasources/rich_inputs_data_source.dart';
+import 'package:vedem/features/rich_inputs/data/datasources/rich_inputs_local_data_source.dart';
+import 'package:vedem/features/rich_inputs/data/repositories/rich_inputs_repository_impl.dart';
+import 'package:vedem/features/rich_inputs/domain/repositories/rich_inputs_repository.dart';
+import 'package:vedem/features/rich_inputs/domain/usecases/load_rich_input_use_case.dart';
+import 'package:vedem/features/rich_inputs/domain/usecases/save_rich_input_use_case.dart';
+import 'package:vedem/features/rich_inputs/presentation/cubit/rich_inputs_cubit.dart';
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
 import 'package:vedem/features/tasks/data/datasources/task_local_data_source.dart';
 import 'package:vedem/features/tasks/data/repositories/task_repository_impl.dart';
@@ -21,6 +30,7 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   await _initTasks();
+  await _initRichInputs();
 }
 
 Future<void> _initTasks() async {
@@ -74,4 +84,35 @@ Future<void> _initTasks() async {
   final path = join(documentsDirectory.path, 'my_app.db');
   final db = await AppDatabase.open(path);
   serviceLocator.registerLazySingleton<Database>(() => db);
+}
+
+Future<void> _initRichInputs() async {
+  serviceLocator.registerFactory(
+    () => RichInputsCubit(
+      loadRichInputUseCase: serviceLocator(),
+      saveRichInputUseCase: serviceLocator(),
+    ),
+  );
+
+  // Usecases
+  serviceLocator.registerLazySingleton(
+    () => LoadRichInputUseCase(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => SaveRichInputUseCase(repository: serviceLocator()),
+  );
+
+  // Repository
+  serviceLocator.registerLazySingleton<RichInputsRepository>(
+    () => RichInputsRepositoryImpl(dataSource: serviceLocator()),
+  );
+
+  // Data sources
+  serviceLocator.registerLazySingleton<RichInputsDataSource>(
+    () => RichInputsLocalDataSource(box: serviceLocator()),
+  );
+
+  // External
+  Box box = await AppHive.initRichInputs();
+  serviceLocator.registerLazySingleton<Box>(() => box);
 }

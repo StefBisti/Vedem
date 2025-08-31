@@ -27,3 +27,17 @@ class ReadTasksForDayUseCaseParams extends Equatable {
   @override
   List<Object?> get props => [dayId];
 }
+
+class DelayedReadTasksForDayUseCase extends ReadTasksForDayUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedReadTasksForDayUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, List<TaskEntity>>> call(
+    ReadTasksForDayUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}

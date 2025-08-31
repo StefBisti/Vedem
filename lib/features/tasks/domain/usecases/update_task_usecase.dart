@@ -45,3 +45,17 @@ class UpdateTaskUseCaseParams extends Equatable {
     diamonds,
   ];
 }
+
+class DelayedUpdateTaskUseCase extends UpdateTaskUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedUpdateTaskUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, Unit>> call(
+    UpdateTaskUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}

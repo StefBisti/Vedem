@@ -27,3 +27,17 @@ class ReadTasksForMonthUseCaseParams extends Equatable {
   @override
   List<Object?> get props => [monthId];
 }
+
+class DelayedReadTasksForMonthUseCase extends ReadTasksForMonthUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedReadTasksForMonthUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, List<TaskEntity>>> call(
+    ReadTasksForMonthUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}

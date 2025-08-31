@@ -49,3 +49,17 @@ class CreateNewTaskUseCaseParams extends Equatable {
     diamonds,
   ];
 }
+
+class DelayedCreateNewTaskUseCase extends CreateNewTaskUseCase {
+  final Duration delay = Duration(milliseconds: delayedUseCaseMilliseconds);
+
+  DelayedCreateNewTaskUseCase({required super.taskRepository});
+
+  @override
+  Future<Either<Failure, TaskEntity>> call(
+    CreateNewTaskUseCaseParams params,
+  ) async {
+    await Future.delayed(delay);
+    return super.call(params);
+  }
+}

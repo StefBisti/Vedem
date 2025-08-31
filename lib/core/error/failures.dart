@@ -10,3 +10,7 @@ abstract class Failure extends Equatable {
 class LocalDatabaseFailure extends Failure {
   const LocalDatabaseFailure(super.message);
 }
+
+class LocalHiveFailure extends Failure {
+  const LocalHiveFailure(super.message);
+}
