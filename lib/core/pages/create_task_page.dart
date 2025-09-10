@@ -6,14 +6,14 @@ import 'package:vedem/features/tasks/presentation/public/create_task_display.dar
 
 class CreateTaskPage extends StatelessWidget {
   final String dayId;
-  final TasksBloc bloc;
+  final TasksBloc tasksBloc;
 
-  const CreateTaskPage({super.key, required this.dayId, required this.bloc});
+  const CreateTaskPage({super.key, required this.dayId, required this.tasksBloc});
 
   static void route(BuildContext context, TasksBloc bloc, String dayId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => CreateTaskPage(dayId: dayId, bloc: bloc),
+        builder: (_) => CreateTaskPage(dayId: dayId, tasksBloc: bloc),
       ),
     );
   }
@@ -21,7 +21,7 @@ class CreateTaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: bloc,
+      value: tasksBloc,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 0.0,

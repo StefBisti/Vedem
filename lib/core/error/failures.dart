@@ -14,3 +14,7 @@ class LocalDatabaseFailure extends Failure {
 class LocalHiveFailure extends Failure {
   const LocalHiveFailure(super.message);
 }
+
+class HighlightProcessingFailure extends Failure {
+  const HighlightProcessingFailure(super.message);
+}

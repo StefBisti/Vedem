@@ -122,7 +122,7 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
                     openBuilder: (context, _) {
                       return CreateTaskPage(
                         dayId: widget.dayId,
-                        bloc: this.context.read<TasksBloc>(),
+                        tasksBloc: this.context.read<TasksBloc>(),
                       );
                     },
                   ),

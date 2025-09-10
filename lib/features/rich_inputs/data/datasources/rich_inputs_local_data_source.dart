@@ -6,7 +6,7 @@ import 'package:vedem/features/rich_inputs/data/datasources/rich_inputs_data_sou
 import 'package:vedem/features/rich_inputs/data/models/rich_input_model.dart';
 
 class RichInputsLocalDataSource implements RichInputsDataSource {
-  final Box box;
+  final Box<RichInputModel> box;
 
   RichInputsLocalDataSource({required this.box});
 

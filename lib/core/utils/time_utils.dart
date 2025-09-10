@@ -14,39 +14,18 @@ class TimeUtils {
     return result;
   }
 
-  static String getDayName(int year, int month, int day) {
-    DateTime date = DateTime(year, month, day);
-    return DateFormat('EEEE').format(date);
-  }
-
-  static String getFullMonthName(int monthIndex) {
-    DateTime date = DateTime(2000, monthIndex);
-    return DateFormat('MMMM').format(date);
-  }
-
-  static String getAbbreviatedMonthName(int monthIndex) {
-    DateTime date = DateTime(2000, monthIndex);
-    return DateFormat('MMM').format(date);
-  }
-
   static int thisDayIndex = DateTime.now().day - 1;
   static int thisMonthIndex = DateTime.now().month - 1;
   static int thisYear = DateTime.now().year;
-  static int thisMonthDaysCount = daysInMonth(thisMonthIndex + 1, thisYear);
 
-  static int daysInMonth(int year, int month) {
-    if (month == 12) {
-      year += 1;
-      month = 1;
-    } else {
-      month += 1;
+  static String thisDayId = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  static String thisMonthId = DateFormat('yyyy-MM').format(DateTime.now());
+
+  static String formatDayId(String dayId, {bool addYear = false}) {
+    DateTime date = DateTime.parse(dayId);
+    if (addYear) {
+      return DateFormat('d MMM yyyy, EEEE').format(date);
     }
-
-    DateTime lastDayOfMonth = DateTime(
-      year,
-      month,
-      1,
-    ).subtract(Duration(days: 1));
-    return lastDayOfMonth.day;
+    return DateFormat('d MMM, EEEE').format(date);
   }
 }

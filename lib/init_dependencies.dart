@@ -6,8 +6,20 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:vedem/core/database/app_database.dart';
 import 'package:vedem/core/hive/app_hive.dart';
+import 'package:vedem/features/highlights/data/datasources/highlights_data_source.dart';
+import 'package:vedem/features/highlights/data/datasources/highlights_local_data_source.dart';
+import 'package:vedem/features/highlights/data/models/highlight_model.dart';
+import 'package:vedem/features/highlights/data/repositories/highlights_repository_impl.dart';
+import 'package:vedem/features/highlights/domain/repositories/highlights_repository.dart';
+import 'package:vedem/features/highlights/domain/usecases/cache_highlights_use_case.dart';
+import 'package:vedem/features/highlights/domain/usecases/change_highlight_use_case.dart';
+import 'package:vedem/features/highlights/domain/usecases/delete_highlight_use_case.dart';
+import 'package:vedem/features/highlights/domain/usecases/load_all_highlights_metadata_use_case.dart';
+import 'package:vedem/features/highlights/domain/usecases/load_month_highlights_metadata_use_case.dart';
+import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.dart';
 import 'package:vedem/features/rich_inputs/data/datasources/rich_inputs_data_source.dart';
 import 'package:vedem/features/rich_inputs/data/datasources/rich_inputs_local_data_source.dart';
+import 'package:vedem/features/rich_inputs/data/models/rich_input_model.dart';
 import 'package:vedem/features/rich_inputs/data/repositories/rich_inputs_repository_impl.dart';
 import 'package:vedem/features/rich_inputs/domain/repositories/rich_inputs_repository.dart';
 import 'package:vedem/features/rich_inputs/domain/usecases/load_rich_input_use_case.dart';
@@ -29,8 +41,10 @@ import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
+  await AppHive.initHive();
   await _initTasks();
   await _initRichInputs();
+  await _initHighlights();
 }
 
 Future<void> _initTasks() async {
@@ -113,6 +127,49 @@ Future<void> _initRichInputs() async {
   );
 
   // External
-  Box box = await AppHive.initRichInputs();
-  serviceLocator.registerLazySingleton<Box>(() => box);
+  Box<RichInputModel> box = await AppHive.initRichInputs();
+  serviceLocator.registerLazySingleton<Box<RichInputModel>>(() => box);
+}
+
+Future<void> _initHighlights() async {
+  serviceLocator.registerFactory(
+    () => HighlightsCubit(
+      serviceLocator(),
+      serviceLocator(),
+      serviceLocator(),
+      serviceLocator(),
+      serviceLocator(),
+    ),
+  );
+
+  // Usecases
+  serviceLocator.registerLazySingleton(
+    () => CacheHighlightsUseCase(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => LoadAllHighlightsMetadataUseCase(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => LoadMonthHighlightsMetadataUseCase(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => ChangeHighlightUseCase(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => DeleteHighlightUseCase(repository: serviceLocator()),
+  );
+
+  // Repository
+  serviceLocator.registerLazySingleton<HighlightsRepository>(
+    () => HighlightsRepositoryImpl(dataSource: serviceLocator()),
+  );
+
+  // Data sources
+  serviceLocator.registerLazySingleton<HighlightsDataSource>(
+    () => HighlightsLocalDataSource(box: serviceLocator()),
+  );
+
+  // External
+  Box<HighlightModel> box = await AppHive.initHighlights();
+  serviceLocator.registerLazySingleton<Box<HighlightModel>>(() => box);
 }

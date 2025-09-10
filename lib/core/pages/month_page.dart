@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
-import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
-import 'package:vedem/features/tasks/presentation/public/list_tasks_display.dart';
+import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.dart';
+import 'package:vedem/features/highlights/presentation/public/highlights_carousel_display.dart';
 
 class MonthPage extends StatelessWidget {
   static void route(BuildContext context, String monthId) {
@@ -23,8 +23,8 @@ class MonthPage extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (_) =>
-              GetIt.instance<TasksBloc>()
-                ..add(ReadTasksForMonthEvent(monthId: monthId)),
+              GetIt.instance<HighlightsCubit>()
+                ..loadHighlightsForMonth(monthId),
         ),
       ],
       child: Scaffold(
@@ -35,7 +35,7 @@ class MonthPage extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [ListTasksDisplay()],
+            children: [SizedBox(height: 100), HighlightsCarouselDisplay()],
           ),
         ),
       ),
