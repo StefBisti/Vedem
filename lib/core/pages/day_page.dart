@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_colors.dart';
+import 'package:vedem/features/days/presentation/cubit/days_cubit.dart';
+import 'package:vedem/features/days/presentation/public/day_header_display.dart';
 import 'package:vedem/features/days/presentation/public/day_heart_button_display.dart';
 import 'package:vedem/features/days/presentation/public/day_share_button_display.dart';
 import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.dart';
@@ -14,11 +16,13 @@ import 'package:vedem/features/tasks/presentation/public/day_tasks_display.dart'
 class DayPage extends StatelessWidget {
   final String dayId;
   final HighlightsCubit highlightsCubit;
+  final DaysCubit daysCubit;
 
   const DayPage({
     super.key,
     required this.dayId,
     required this.highlightsCubit,
+    required this.daysCubit,
   });
 
   static void route(BuildContext context, String dayId) {
@@ -28,6 +32,7 @@ class DayPage extends StatelessWidget {
         builder: (_) => DayPage(
           dayId: dayId,
           highlightsCubit: context.read<HighlightsCubit>(),
+          daysCubit: context.read<DaysCubit>(),
         ),
       ),
     );
@@ -47,6 +52,7 @@ class DayPage extends StatelessWidget {
               GetIt.instance<RichInputsCubit>()..loadRichInput(dayId),
         ),
         BlocProvider.value(value: highlightsCubit),
+        BlocProvider.value(value: daysCubit),
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -56,6 +62,7 @@ class DayPage extends StatelessWidget {
           toolbarHeight: 0.0,
           backgroundColor: AppColors.darkBackgroundColor.withAlpha(100),
         ),
+        backgroundColor: AppColors.lightBackgroundColor,
         extendBodyBehindAppBar: true,
         body: SingleChildScrollView(
           child: Column(
@@ -63,10 +70,12 @@ class DayPage extends StatelessWidget {
             children: [
               HighlightHeaderDisplay(
                 dayId: dayId,
-                shareWidget: DayShareButtonDisplay(),
-                heartWidget: DayHeartButtonDisplay(),
+                shareWidget: DayShareButtonDisplay(dayId: dayId),
+                heartWidget: DayHeartButtonDisplay(dayId: dayId),
               ),
               const SizedBox(height: 16.0),
+              DayHeaderDisplay(dayId: dayId),
+              const SizedBox(height: 32.0),
               DayTasksDisplay(dayId: dayId),
               const SizedBox(height: 16.0),
               RichInputDisplay(richInputKey: dayId),

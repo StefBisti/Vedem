@@ -6,6 +6,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:vedem/core/database/app_database.dart';
 import 'package:vedem/core/hive/app_hive.dart';
+import 'package:vedem/features/days/data/datasources/days_data_source.dart';
+import 'package:vedem/features/days/data/datasources/days_local_data_source.dart';
+import 'package:vedem/features/days/data/models/day_model.dart';
+import 'package:vedem/features/days/data/repositories/days_repository_impl.dart';
+import 'package:vedem/features/days/domain/repositories/days_repository.dart';
+import 'package:vedem/features/days/presentation/cubit/days_cubit.dart';
 import 'package:vedem/features/highlights/data/datasources/highlights_data_source.dart';
 import 'package:vedem/features/highlights/data/datasources/highlights_local_data_source.dart';
 import 'package:vedem/features/highlights/data/models/highlight_model.dart';
@@ -45,6 +51,7 @@ Future<void> initDependencies() async {
   await _initTasks();
   await _initRichInputs();
   await _initHighlights();
+  await _initDays();
 }
 
 Future<void> _initTasks() async {
@@ -172,4 +179,23 @@ Future<void> _initHighlights() async {
   // External
   Box<HighlightModel> box = await AppHive.initHighlights();
   serviceLocator.registerLazySingleton<Box<HighlightModel>>(() => box);
+}
+
+Future<void> _initDays() async {
+  // Cubit
+  serviceLocator.registerFactory(() => DaysCubit(serviceLocator()));
+
+  // Repository
+  serviceLocator.registerLazySingleton<DaysRepository>(
+    () => DaysRepositoryImpl(dataSource: serviceLocator()),
+  );
+
+  // Data sources
+  serviceLocator.registerLazySingleton<DaysDataSource>(
+    () => DaysLocalDataSource(box: serviceLocator()),
+  );
+
+  // External
+  Box<DayModel> box = await AppHive.initDays();
+  serviceLocator.registerLazySingleton<Box<DayModel>>(() => box);
 }

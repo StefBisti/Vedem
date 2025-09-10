@@ -1,5 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:vedem/core/hive/hive_constants.dart';
+import 'package:vedem/features/days/data/models/day_model.dart';
+import 'package:vedem/features/days/data/models/day_model_adapter.dart';
 import 'package:vedem/features/highlights/data/models/highlight_model.dart';
 import 'package:vedem/features/highlights/data/models/highlight_model_adapter.dart';
 import 'package:vedem/features/rich_inputs/data/models/rich_input_model.dart';
@@ -22,6 +24,12 @@ class AppHive {
   static Future<Box<HighlightModel>> initHighlights() async {
     Hive.registerAdapter(HighlightModelAdapter());
     final box = await Hive.openBox<HighlightModel>(highlightId);
+    return box;
+  }
+
+  static Future<Box<DayModel>> initDays() async {
+    Hive.registerAdapter(DayModelAdapter());
+    final box = await Hive.openBox<DayModel>(daysId);
     return box;
   }
 }

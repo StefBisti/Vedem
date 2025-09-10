@@ -7,6 +7,8 @@ import 'package:vedem/core/style/app_colors.dart';
 import 'package:vedem/core/style/app_style.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 import 'package:vedem/core/utils/time_utils.dart';
+import 'package:vedem/features/days/presentation/cubit/days_cubit.dart';
+import 'package:vedem/features/days/presentation/public/carousel_heart_display.dart';
 import 'package:vedem/features/highlights/domain/entities/highlight_cache_quality.dart';
 import 'package:vedem/features/highlights/domain/entities/highlight_entity.dart';
 import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.dart';
@@ -16,14 +18,12 @@ class HighlightsCarouselImage extends StatelessWidget {
   final int highlightIndex;
   final double imageWidth;
   final Function()? onTap;
-  final Widget? heartWidget;
 
   const HighlightsCarouselImage({
     required this.highlight,
     required this.highlightIndex,
     required this.imageWidth,
     this.onTap,
-    this.heartWidget,
     super.key,
   });
 
@@ -103,11 +103,10 @@ class HighlightsCarouselImage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Positioned(
                   top: 16,
                   right: 16,
-                  child: heartWidget ?? SizedBox(),
+                  child: CarouselHeartDisplay(dayId: highlight.dayId),
                 ),
               ],
             ),
@@ -117,6 +116,7 @@ class HighlightsCarouselImage extends StatelessWidget {
           return DayPage(
             dayId: highlight.dayId,
             highlightsCubit: context.read<HighlightsCubit>(),
+            daysCubit: context.read<DaysCubit>(),
           );
         },
       ),

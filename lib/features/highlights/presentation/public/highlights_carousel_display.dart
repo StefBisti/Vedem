@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vedem/core/utils/misc_utils.dart';
-import 'package:vedem/features/days/presentation/public/carousel_heart_display.dart';
 import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.dart';
 import 'package:vedem/features/highlights/presentation/private/highlights_carousel.dart';
 
@@ -25,14 +24,7 @@ class HighlightsCarouselDisplay extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return HighlightsCarousel(
-          highlights: state.highlights,
-          heartWidgets: state.highlights
-              .map<Widget?>(
-                (h) => CarouselHeartDisplay(hearted: true, onUnheart: () {}),
-              )
-              .toList(),
-        );
+        return HighlightsCarousel(highlights: state.highlights);
       },
     );
   }

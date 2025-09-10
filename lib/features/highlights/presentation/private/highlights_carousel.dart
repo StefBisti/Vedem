@@ -7,13 +7,8 @@ import 'package:vedem/features/highlights/presentation/private/highlights_carous
 
 class HighlightsCarousel extends StatefulWidget {
   final List<HighlightEntity> highlights;
-  final List<Widget?> heartWidgets;
 
-  const HighlightsCarousel({
-    super.key,
-    required this.highlights,
-    required this.heartWidgets,
-  });
+  const HighlightsCarousel({super.key, required this.highlights});
 
   @override
   State<HighlightsCarousel> createState() => _HighlightsCarouselState();
@@ -171,8 +166,6 @@ class _HighlightsCarouselState extends State<HighlightsCarousel>
                       highlightIndex: getGoodIndex(currentIndex - 1),
                       imageWidth: imageWidth,
                       onTap: _goToLeft,
-                      heartWidget:
-                          widget.heartWidgets[getGoodIndex(currentIndex - 1)],
                     ),
                   ),
                 ),
@@ -190,8 +183,6 @@ class _HighlightsCarouselState extends State<HighlightsCarousel>
                       highlightIndex: getGoodIndex(currentIndex + 1),
                       imageWidth: imageWidth,
                       onTap: _goToRight,
-                      heartWidget:
-                          widget.heartWidgets[getGoodIndex(currentIndex + 1)],
                     ),
                   ),
                 ),
@@ -207,8 +198,6 @@ class _HighlightsCarouselState extends State<HighlightsCarousel>
                       highlight: widget.highlights[getGoodIndex(currentIndex)],
                       highlightIndex: getGoodIndex(currentIndex),
                       imageWidth: imageWidth,
-                      heartWidget:
-                          widget.heartWidgets[getGoodIndex(currentIndex)],
                     ),
                   ),
                 ),

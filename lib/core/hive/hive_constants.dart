@@ -1,3 +1,6 @@
+const String daysId = 'days';
+const int dayModelId = 0;
+
 const String richInputId = 'rich_inputs';
 const int richInputTypelId = 1;
 const int richInputPartModelId = 2;

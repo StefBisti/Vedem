@@ -19,7 +19,7 @@ class TimeUtils {
   static int thisYear = DateTime.now().year;
 
   // static String thisDayId = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  static String thisDayId = '2025-09-14';
+  static String thisDayId = '2025-09-17';
   static String thisMonthId = DateFormat('yyyy-MM').format(DateTime.now());
 
   static String formatDayId(String dayId, {bool addYear = false}) {

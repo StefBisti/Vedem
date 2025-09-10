@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:vedem/core/pages/gallery_page.dart';
+import 'package:vedem/core/pages/month_page.dart';
 import 'package:vedem/core/style/app_themes.dart';
+import 'package:vedem/core/utils/time_utils.dart';
 import 'package:vedem/init_dependencies.dart';
 
 void main() async {
@@ -48,7 +49,7 @@ class _MainState extends State<Main> {
       debugShowCheckedModeBanner: false,
       title: 'Vedem',
       theme: AppThemes.lightTheme,
-      home: GalleryPage(),
+      home: MonthPage(monthId: TimeUtils.thisMonthId),
     );
   }
 }
