@@ -29,7 +29,11 @@ class GalleryPage extends StatelessWidget {
         extendBodyBehindAppBar: true,
         body: SingleChildScrollView(
           child: Column(
-            children: [SizedBox(height: 50), HighlightsGalleryDisplay()],
+            children: [
+              SizedBox(height: 50),
+              HighlightsGalleryDisplay(),
+              SizedBox(height: 50),
+            ],
           ),
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vedem/core/utils/misc_utils.dart';
@@ -15,12 +17,12 @@ class HighlightsCarouselDisplay extends StatelessWidget {
         if (state.error != null) {
           MiscUtils.showSnackBar(context, state.error!);
         }
-        // print('#############################');
-        // for (int i = 0; i < state.highlights.length; i++) {
-        //   print(
-        //     "$i - ${state.highlights[i].dayId}, ${state.highlights[i].exists}, ${state.highlights[i].cacheQuality}, ${(state.highlights[i].cachedImage ?? Uint8List(0)).length}",
-        //   );
-        // }
+        print('#############################');
+        for (int i = 0; i < state.highlights.length; i++) {
+          print(
+            "$i - ${state.highlights[i].dayId}, ${state.highlights[i].exists}, ${state.highlights[i].cacheQuality}, ${(state.highlights[i].cachedImage ?? Uint8List(0)).length}",
+          );
+        }
       },
       builder: (context, state) {
         return HighlightsCarousel(

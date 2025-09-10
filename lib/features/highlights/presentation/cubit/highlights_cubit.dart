@@ -316,7 +316,7 @@ class HighlightsCubit extends Cubit<HighlightsState> {
     newHighlights[highlightIndex] = newHighlights[highlightIndex].copyWith(
       exists: false,
       cacheQuality: HighlightCacheQuality.none,
-      cachedImage: null,
+      cachedImage: Uint8List(0),
     );
     emit(state.copyWith(highlights: newHighlights));
 

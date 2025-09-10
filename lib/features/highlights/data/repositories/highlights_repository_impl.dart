@@ -133,7 +133,7 @@ class HighlightsRepositoryImpl implements HighlightsRepository {
           if (indices.contains(i) == false) {
             newHighlights[i] = newHighlights[i].copyWith(
               cacheQuality: HighlightCacheQuality.none,
-              cachedImage: null,
+              cachedImage: Uint8List(0),
             );
           }
         }
