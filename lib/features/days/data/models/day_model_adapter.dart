@@ -15,23 +15,20 @@ class DayModelAdapter extends TypeAdapter<DayModel> {
     return DayModel(
       dayId: (fields[0] as String),
       hearted: (fields[1] as bool),
-      diamondsGain: (fields[2] as int),
-      diamondsProfit: (fields[3] as int),
+      diamonds: (fields[2] as int),
     );
   }
 
   @override
   void write(BinaryWriter writer, DayModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.dayId)
       ..writeByte(1)
       ..write(obj.hearted)
       ..writeByte(2)
-      ..write(obj.diamondsGain)
-      ..writeByte(3)
-      ..write(obj.diamondsProfit);
+      ..write(obj.diamonds);
   }
 
   @override

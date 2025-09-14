@@ -33,15 +33,11 @@ class DayHeaderDisplay extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      Text('${day.diamondsGain} ', style: AppTextStyles.heading),
+                      Text('${day.diamonds} ', style: AppTextStyles.heading),
                       Icon(
                         Icons.diamond_rounded,
                         size: 18.0,
                         color: AppColors.primaryDarkTextColor,
-                      ),
-                      Text(
-                        ' (+${day.diamondsProfit})',
-                        style: AppTextStyles.content,
                       ),
                     ],
                   ),
@@ -51,7 +47,10 @@ class DayHeaderDisplay extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   children: [
-                    TextSpan(text: "Only 38 more ", style: AppTextStyles.content),
+                    TextSpan(
+                      text: "Only 38 more ",
+                      style: AppTextStyles.content,
+                    ),
                     WidgetSpan(
                       child: Icon(
                         Icons.diamond_rounded,

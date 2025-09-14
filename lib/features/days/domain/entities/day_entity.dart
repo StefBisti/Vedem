@@ -3,30 +3,30 @@ import 'package:equatable/equatable.dart';
 class DayEntity extends Equatable {
   final String dayId;
   final bool hearted;
-  final int diamondsGain;
-  final int diamondsProfit;
+  final int diamonds;
+  final bool isInitialized;
 
   const DayEntity({
     required this.dayId,
     this.hearted = false,
-    this.diamondsGain = 0,
-    this.diamondsProfit = 0,
+    this.diamonds = 0,
+    this.isInitialized = false,
   });
 
   DayEntity copyWith({
     String? dayId,
     bool? hearted,
-    int? diamondsGain,
-    int? diamondsProfit,
+    int? diamonds,
+    bool? isInitialized,
   }) {
     return DayEntity(
       dayId: dayId ?? this.dayId,
       hearted: hearted ?? this.hearted,
-      diamondsGain: diamondsGain ?? this.diamondsGain,
-      diamondsProfit: diamondsProfit ?? this.diamondsProfit,
+      diamonds: diamonds ?? this.diamonds,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 
   @override
-  List<Object?> get props => [dayId, hearted, diamondsGain, diamondsProfit];
+  List<Object?> get props => [dayId, hearted, diamonds, isInitialized];
 }

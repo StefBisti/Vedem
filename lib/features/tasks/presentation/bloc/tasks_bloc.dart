@@ -118,6 +118,22 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       emit(state.copyWith(error: noOperationWhileIsLoadingError));
       return;
     }
+
+    if (event.alsoInitialize) {
+      emit(TasksState(tasks: [], isLoading: true, error: null));
+      final res = await initializeTasksForDayUseCase.call(
+        InitializeTasksForDayUseCaseParams(dayId: event.dayId),
+      );
+      res.fold(
+        (failure) => emit(
+          TasksState(tasks: [], isLoading: false, error: failure.message),
+        ),
+        (initialTasks) => emit(
+          TasksState(tasks: initialTasks, isLoading: false, error: null),
+        ),
+      );
+    }
+
     emit(TasksState(tasks: [], isLoading: true, error: null));
     final res = await readTasksForDayUseCase.call(
       ReadTasksForDayUseCaseParams(dayId: event.dayId),

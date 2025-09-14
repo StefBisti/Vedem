@@ -23,13 +23,7 @@ class CreateNewTaskEvent extends TasksEvent {
   });
 
   @override
-  List<Object> get props => [
-    dayId,
-    categoryId,
-    content,
-    isRecurring,
-    diamonds,
-  ];
+  List<Object> get props => [dayId, categoryId, content, isRecurring, diamonds];
 }
 
 class InitializeTasksForDayEvent extends TasksEvent {
@@ -41,7 +35,11 @@ class InitializeTasksForDayEvent extends TasksEvent {
 
 class ReadTasksForDayEvent extends TasksEvent {
   final String dayId;
-  const ReadTasksForDayEvent({required this.dayId});
+  final bool alsoInitialize;
+  const ReadTasksForDayEvent({
+    required this.dayId,
+    required this.alsoInitialize,
+  });
   @override
   List<Object> get props => [dayId];
 }
@@ -82,10 +80,7 @@ class DeleteTaskEvent extends TasksEvent {
   final String? dayId;
   final int taskId;
 
-  const DeleteTaskEvent({
-    required this.dayId,
-    required this.taskId,
-  });
+  const DeleteTaskEvent({required this.dayId, required this.taskId});
 
   @override
   List<Object> get props => [dayId ?? '', taskId];

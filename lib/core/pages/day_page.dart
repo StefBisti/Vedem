@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vedem/core/style/app_colors.dart';
+import 'package:vedem/features/days/domain/entities/day_entity.dart';
 import 'package:vedem/features/days/presentation/cubit/days_cubit.dart';
 import 'package:vedem/features/days/presentation/public/day_header_display.dart';
 import 'package:vedem/features/days/presentation/public/day_heart_button_display.dart';
@@ -40,12 +41,24 @@ class DayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool alsoInitializeDay =
+        daysCubit.state.days
+            .firstWhere(
+              (d) => d.dayId == dayId,
+              orElse: () => DayEntity(dayId: '1e2'),
+            )
+            .isInitialized ==
+        false;
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) =>
-              GetIt.instance<TasksBloc>()
-                ..add(ReadTasksForDayEvent(dayId: dayId)),
+          create: (_) => GetIt.instance<TasksBloc>()
+            ..add(
+              ReadTasksForDayEvent(
+                dayId: dayId,
+                alsoInitialize: alsoInitializeDay,
+              ),
+            ),
         ),
         BlocProvider(
           create: (_) =>
