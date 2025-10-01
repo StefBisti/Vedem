@@ -7,7 +7,6 @@ import 'package:vedem/core/style/app_colors.dart';
 import 'package:vedem/core/style/app_style.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 import 'package:vedem/core/utils/time_utils.dart';
-import 'package:vedem/features/days/presentation/cubit/days_cubit.dart';
 import 'package:vedem/features/days/presentation/public/carousel_heart_display.dart';
 import 'package:vedem/features/highlights/domain/entities/highlight_cache_quality.dart';
 import 'package:vedem/features/highlights/domain/entities/highlight_entity.dart';
@@ -115,8 +114,8 @@ class HighlightsCarouselImage extends StatelessWidget {
         openBuilder: (ctx, _) {
           return DayPage(
             dayId: highlight.dayId,
-            highlightsCubit: context.read<HighlightsCubit>(),
-            daysCubit: context.read<DaysCubit>(),
+            // highlightsCubit: context.read<HighlightsCubit>(),
+            // daysCubit: context.read<DaysCubit>(),
           );
         },
       ),

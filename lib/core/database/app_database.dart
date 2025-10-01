@@ -8,32 +8,36 @@ class AppDatabase {
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-            CREATE TABLE ${TasksKeys.table} (
-              ${TasksKeys.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-              ${TasksKeys.categoryId} INTEGER NOT NULL,
-              ${TasksKeys.content} TEXT NOT NULL,
-              ${TasksKeys.isRecurring} INTEGER NOT NULL,
-              ${TasksKeys.diamonds} INTEGER NOT NULL
-            )
-          ''');
-        await db.execute('''
-            CREATE TABLE ${DayTasksKeys.table} (
-              ${DayTasksKeys.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-              ${DayTasksKeys.day} TEXT NOT NULL,
-              ${DayTasksKeys.task} INTEGER NOT NULL,
-              ${DayTasksKeys.done} INTEGER NOT NULL DEFAULT 0,
-              FOREIGN KEY (${DayTasksKeys.task}) REFERENCES ${TasksKeys.table} (${TasksKeys.id})
-            );
-          ''');
-        await db.execute(
-          'CREATE INDEX idx_tasks_category_id ON ${TasksKeys.table}(${TasksKeys.categoryId});',
-        );
-        await db.execute(
-          'CREATE INDEX idx_day_tasks_task_id ON ${DayTasksKeys.table}(${DayTasksKeys.task});',
-        );
-        await db.execute(
-          'CREATE INDEX idx_day_tasks_day_id ON ${DayTasksKeys.table}(${DayTasksKeys.day});',
-        );
+
+          CREATE TABLE $tasksTableKey (
+            $taskIdKey INTEGER PRIMARY KEY AUTOINCREMENT,
+            $taskCategoryIdKey INTEGER NOT NULL,
+            $taskContentKey TEXT NOT NULL,
+            $taskIsStarredKey INTEGER NOT NULL DEFAULT 0,
+            $taskIsDailyKey INTEGER NOT NULL DEFAULT 0
+          );
+
+          CREATE TABLE $dayTasksTableKey (
+            $dayTaskIdKey INTEGER PRIMARY KEY AUTOINCREMENT,
+            $dayTaskDayIdKey TEXT NOT NULL,
+            $dayTaskTaskIdKey INTEGER NOT NULL,
+            $dayTaskDoneTypeKey INTEGER NOT NULL DEFAULT 0,
+            $dayTaskIsSecondChanceKey INTEGER NOT NULL DEFAULT 0,
+            $dayTaskEncodedSubtasksKey TEXT,
+            $dayTaskImportanceKey INTEGER,
+            $dayTaskEffortRequiredKey INTEGER,
+            $dayTaskTimeRequiredKey INTEGER,
+            $dayTaskNotGreatDiamondsKey INTEGER,
+            $dayTaskOnPointDiamondsKey INTEGER,
+            $dayTaskAwesomeDiamondsKey INTEGER,
+            $dayTaskDueTimeInMinutesKey INTEGER,
+            $dayTaskNotifyTimeInMinutesKey INTEGER,
+            FOREIGN KEY($dayTaskTaskIdKey) REFERENCES $tasksTableKey($taskIdKey) ON DELETE CASCADE
+          );
+          CREATE INDEX idx_day_tasks_day_id ON $dayTasksTableKey($dayTaskDayIdKey);
+          CREATE INDEX idx_day_tasks_task_id ON $dayTasksTableKey($dayTaskTaskIdKey);
+          CREATE INDEX idx_tasks_task_id ON $tasksTableKey($taskCategoryIdKey);
+        ''');
       },
     );
   }

@@ -1,263 +1,239 @@
-import 'package:flutter/foundation.dart';
 import 'package:vedem/core/database/database_keys.dart';
-import 'package:vedem/core/error/error_messages.dart';
-import 'package:vedem/core/error/exceptions.dart';
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
-import 'package:vedem/features/tasks/data/models/task_model.dart';
+import 'package:vedem/features/tasks/data/models/day_task_entry_model.dart';
+import 'package:vedem/features/tasks/data/models/task_entry_model.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:vedem/features/tasks/data/models/user_task_model.dart';
 
-// TO DO See trashed tasks
 class TaskLocalDataSource implements TaskDataSource {
   final Database db;
 
   const TaskLocalDataSource({required this.db});
 
   @override
-  Future<TaskModel> addNewTaskAndAssignToDay(
+  Future<List<UserTaskModel>> readUserTasksByDay(String dayId) async {
+    final result = await db.rawQuery(
+      '''
+        SELECT d.*, t.*
+        FROM $dayTasksTableKey d
+        JOIN $tasksTableKey t ON d.$dayTaskTaskIdKey = t.$taskIdKey
+        WHERE d.$dayTaskDayIdKey = ?
+      ''',
+      [dayId],
+    );
+
+    return result.map((row) {
+      final task = TaskEntryModel.fromMap(row);
+      final dayTask = DayTaskEntryModel.fromMap(row);
+      return UserTaskModel(taskEntryModel: task, dayTaskEntryModel: dayTask);
+    }).toList();
+  }
+
+  @override
+  Future<List<UserTaskModel>> readDailyOrNotDoneUserTasksFromDay(
     String dayId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
   ) async {
-    try {
-      return await db.transaction((txn) async {
-        final taskId = await txn.insert(TasksKeys.table, {
-          TasksKeys.categoryId: categoryId,
-          TasksKeys.content: content,
-          TasksKeys.isRecurring: isRecurring ? 1 : 0,
-          TasksKeys.diamonds: diamonds,
-        });
+    final result = await db.rawQuery(
+      '''
+        SELECT d.*, t.*
+        FROM $dayTasksTableKey d
+        JOIN $tasksTableKey t ON d.$dayTaskTaskIdKey = t.$taskIdKey
+        WHERE d.$dayTaskDayIdKey = ?
+          AND (t.$taskIsDailyKey = 1 OR (d.$dayTaskDoneTypeKey = 0 AND d.$dayTaskIsSecondChanceKey = 0))
+      ''',
+      [dayId],
+    );
 
-        await txn.insert(DayTasksKeys.table, {
-          DayTasksKeys.day: dayId,
-          DayTasksKeys.task: taskId,
-          DayTasksKeys.done: 0,
-        });
+    return result.map((row) {
+      final task = TaskEntryModel.fromMap(row);
+      final dayTask = DayTaskEntryModel.fromMap(row);
+      return UserTaskModel(taskEntryModel: task, dayTaskEntryModel: dayTask);
+    }).toList();
+  }
 
-        return TaskModel(
+  @override
+  Future<List<TaskEntryModel>> readAllTaskEntries() async {
+    final result = await db.query(tasksTableKey);
+    return result.map((row) => TaskEntryModel.fromMap(row)).toList();
+  }
+
+  @override
+  Future<List<TaskEntryModel>> readStarredTaskEntries() async {
+    final result = await db.query(
+      tasksTableKey,
+      where: '$taskIsStarredKey = ?',
+      whereArgs: [1],
+    );
+    return result.map((row) => TaskEntryModel.fromMap(row)).toList();
+  }
+
+  @override
+  Future<List<TaskEntryModel>> readTrashedTaskEntries() async {
+    final result = await db.rawQuery('''
+    SELECT t.*
+    FROM $tasksTableKey t
+    LEFT JOIN $dayTasksTableKey d
+      ON t.$taskIdKey = d.$dayTaskTaskIdKey
+    WHERE d.$dayTaskIdKey IS NULL
+  ''');
+
+    return result.map((row) => TaskEntryModel.fromMap(row)).toList();
+  }
+
+  @override
+  Future<List<TaskEntryModel>> readTaskEntriesByCategoryId(
+    int categoryId,
+  ) async {
+    final result = await db.query(
+      tasksTableKey,
+      where: '$taskCategoryIdKey = ?',
+      whereArgs: [categoryId],
+    );
+    return result.map((row) => TaskEntryModel.fromMap(row)).toList();
+  }
+
+  @override
+  Future<TaskEntryModel?> readTaskEntryWithContent(String content) async {
+    final result = await db.query(
+      tasksTableKey,
+      where: '$taskContentKey = ?',
+      whereArgs: [content],
+    );
+    if (result.isEmpty) return null;
+    return TaskEntryModel.fromMap(result[0]);
+  }
+
+  @override
+  Future<UserTaskModel> writeTaskWithDayTask(
+    TaskEntryModel taskEntry,
+    DayTaskEntryModel dayTaskEntry,
+  ) async {
+    return await db.transaction((txn) async {
+      final taskId = await txn.insert(
+        tasksTableKey,
+        taskEntry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      final dayTaskId = await txn.insert(
+        dayTasksTableKey,
+        dayTaskEntry.copyWith(taskId: taskId).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      return UserTaskModel(
+        taskEntryModel: taskEntry.copyWith(taskId: taskId),
+        dayTaskEntryModel: dayTaskEntry.copyWith(
+          dayTaskId: dayTaskId,
           taskId: taskId,
-          categoryId: categoryId,
-          content: content,
-          isRecurring: isRecurring,
-          diamonds: diamonds,
-          isDone: false,
-        );
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: createTaskError);
-    }
+        ),
+      );
+    });
   }
 
   @override
-  Future<void> addNewDayTaskConnection(
-    String dayId,
-    int taskId,
-    bool done,
+  Future<void> writeDayTaskEntry(DayTaskEntryModel dayTaskEntry) async {
+    await db.insert(
+      dayTasksTableKey,
+      dayTaskEntry.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
+  Future<void> writeDayTaskEntries(
+    List<DayTaskEntryModel> dayTaskEntries,
   ) async {
-    try {
-      await db.insert(DayTasksKeys.table, {
-        DayTasksKeys.day: dayId,
-        DayTasksKeys.task: taskId,
-        DayTasksKeys.done: done ? 1 : 0,
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: createTaskError);
-    }
-  }
-
-  @override
-  Future<List<TaskModel>> readTasksForDay(String dayId) async {
-    try {
-      final result = await db.rawQuery(
-        '''
-          SELECT 
-            t.${TasksKeys.id},
-            t.${TasksKeys.categoryId},
-            t.${TasksKeys.content},
-            t.${TasksKeys.isRecurring},
-            t.${TasksKeys.diamonds},
-            dt.${DayTasksKeys.done}
-          FROM ${DayTasksKeys.table} dt
-          INNER JOIN ${TasksKeys.table} t ON dt.${DayTasksKeys.task} = t.${TasksKeys.id}
-          WHERE dt.${DayTasksKeys.day} = ?
-        ''',
-        [dayId],
+    final batch = db.batch();
+    for (final entry in dayTaskEntries) {
+      batch.insert(
+        dayTasksTableKey,
+        entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      return result.map((e) => TaskModel.fromMap(e)).toList();
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: readTasksError);
     }
+    await batch.commit(noResult: true);
   }
 
   @override
-  Future<List<TaskModel>> readTasksForMonth(String monthId) async {
-    try {
-      final parts = monthId.split('-');
-
-      final year = int.parse(parts[0]);
-      final month = int.parse(parts[1]);
-
-      final nextMonth = (month == 12)
-          ? DateTime(year + 1, 1, 1)
-          : DateTime(year, month + 1, 1);
-
-      String formatDate(DateTime d) =>
-          '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
-      final startStr = '$monthId-01';
-      final endStr = formatDate(nextMonth);
-
-      final result = await db.rawQuery(
-        '''
-          SELECT DISTINCT
-            t.${TasksKeys.id},
-            t.${TasksKeys.categoryId},
-            t.${TasksKeys.content},
-            t.${TasksKeys.isRecurring},
-            t.${TasksKeys.diamonds}
-          FROM ${DayTasksKeys.table} dt
-          INNER JOIN ${TasksKeys.table} t ON dt.${DayTasksKeys.task} = t.${TasksKeys.id}
-          WHERE dt.${DayTasksKeys.day} >= ? AND dt.${DayTasksKeys.day} < ?
-        ''',
-        [startStr, endStr],
-      );
-      return result.map((e) => TaskModel.fromMap(e)).toList();
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: readTasksError);
-    }
+  Future<void> updateTaskEntry(TaskEntryModel taskEntry) async {
+    await db.update(
+      tasksTableKey,
+      taskEntry.toMap(),
+      where: '$taskIdKey = ?',
+      whereArgs: [taskEntry.taskId],
+    );
   }
 
   @override
-  Future<List<TaskModel>> getDefaultTasksNotAssignedToDay(String dayId) async {
-    // to do: use dayId in future update to get second chance tasks
-    try {
-      final result = await db.rawQuery('''
-      SELECT
-        ${TasksKeys.id},
-        ${TasksKeys.categoryId},
-        ${TasksKeys.content},
-        ${TasksKeys.isRecurring},
-        ${TasksKeys.diamonds}
-      FROM ${TasksKeys.table}
-      WHERE ${TasksKeys.isRecurring} = 1
-    ''');
-      return result.map((e) => TaskModel.fromMap(e)).toList();
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: readTasksError);
-    }
+  Future<void> updateDayTaskEntry(DayTaskEntryModel dayTaskEntry) async {
+    await db.update(
+      dayTasksTableKey,
+      dayTaskEntry.toMap(),
+      where: '$dayTaskIdKey = ?',
+      whereArgs: [dayTaskEntry.dayTaskId],
+    );
   }
 
   @override
-  Future<void> updateGenericTask(
-    int taskId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
+  Future<void> updateTaskAndDayTaskEntry(
+    TaskEntryModel taskEntry,
+    DayTaskEntryModel dayTaskEntry,
   ) async {
-    try {
-      await db.update(
-        TasksKeys.table,
-        {
-          TasksKeys.categoryId: categoryId,
-          TasksKeys.content: content,
-          TasksKeys.isRecurring: isRecurring ? 1 : 0,
-          TasksKeys.diamonds: diamonds,
-        },
-        where: '${TasksKeys.id} = ?',
-        whereArgs: [taskId],
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: updateTaskError);
-    }
+    final batch = db.batch();
+    batch.update(
+      tasksTableKey,
+      taskEntry.toMap(),
+      where: '$taskIdKey = ?',
+      whereArgs: [taskEntry.taskId],
+    );
+    batch.update(
+      dayTasksTableKey,
+      dayTaskEntry.toMap(),
+      where: '$dayTaskIdKey = ?',
+      whereArgs: [dayTaskEntry.dayTaskId],
+    );
+    await batch.commit(noResult: true);
   }
 
   @override
-  Future<void> updateDayTaskConnection(
-    String dayId,
-    int taskId,
-    bool done,
+  Future<void> setDayTaskDoneType(int dayTaskId, int doneType) async {
+    db.update(
+      dayTasksTableKey,
+      {dayTaskDoneTypeKey: doneType},
+      where: '$dayTaskIdKey = ?',
+      whereArgs: [dayTaskId],
+    );
+  }
+
+  @override
+  Future<void> setDayTaskNewSubtaskEcoding(
+    int dayTaskId,
+    String newSubtaskEncoding,
   ) async {
-    try {
-      await db.update(
-        DayTasksKeys.table,
-        {DayTasksKeys.done: done ? 1 : 0},
-        where:
-            '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
-        whereArgs: [dayId, taskId],
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: updateTaskError);
-    }
+    db.update(
+      dayTasksTableKey,
+      {dayTaskEncodedSubtasksKey: newSubtaskEncoding},
+      where: '$dayTaskIdKey = ?',
+      whereArgs: [dayTaskId],
+    );
   }
 
   @override
-  Future<void> deleteTaskCompletely(int taskId) async {
-    try {
-      await db.transaction<void>((txn) async {
-        await txn.delete(
-          TasksKeys.table,
-          where: '${TasksKeys.id} = ?',
-          whereArgs: [taskId],
-        );
-        await txn.delete(
-          DayTasksKeys.table,
-          where: '${DayTasksKeys.task} = ?',
-          whereArgs: [taskId],
-        );
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: deleteTaskError);
-    }
+  Future<void> deleteTaskEntryRecursively(int taskId) async {
+    await db.delete(
+      tasksTableKey,
+      where: '$taskIdKey = ?',
+      whereArgs: [taskId],
+    );
   }
 
   @override
-  Future<void> deleteDayTaskConnection(String dayId, int taskId) async {
-    try {
-      await db.delete(
-        DayTasksKeys.table,
-        where:
-            '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
-        whereArgs: [dayId, taskId],
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: deleteTaskError);
-    }
-  }
-
-  @override
-  Future<void> deleteDayTaskConnectionAndSetTaskNotRecurring(
-    String dayId,
-    int taskId,
-  ) async {
-    try {
-      await db.transaction<void>((txn) async {
-        await txn.delete(
-          DayTasksKeys.table,
-          where:
-              '${DayTasksKeys.day} = ? AND ${DayTasksKeys.task} = ?',
-          whereArgs: [dayId, taskId],
-        );
-        await txn.update(
-          TasksKeys.table,
-          {TasksKeys.isRecurring: 0},
-          where: '${TasksKeys.id} = ?',
-          whereArgs: [taskId],
-        );
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      throw LocalDatabaseException(message: deleteTaskError);
-    }
+  Future<void> deleteDayTaskEntry(int dayTaskId) async {
+    await db.delete(
+      dayTasksTableKey,
+      where: '$dayTaskIdKey = ?',
+      whereArgs: [dayTaskId],
+    );
   }
 }

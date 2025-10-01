@@ -34,15 +34,8 @@ import 'package:vedem/features/rich_inputs/presentation/cubit/rich_inputs_cubit.
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
 import 'package:vedem/features/tasks/data/datasources/task_local_data_source.dart';
 import 'package:vedem/features/tasks/data/repositories/task_repository_impl.dart';
-import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
-import 'package:vedem/features/tasks/domain/usecases/create_new_task_use_case.dart';
-import 'package:vedem/features/tasks/domain/usecases/delete_task_usecase.dart';
-import 'package:vedem/features/tasks/domain/usecases/initialize_tasks_for_day_use_case.dart';
-import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_day_usecase.dart';
-import 'package:vedem/features/tasks/domain/usecases/read_tasks_for_month_use_case.dart';
-import 'package:vedem/features/tasks/domain/usecases/set_task_usecase.dart';
-import 'package:vedem/features/tasks/domain/usecases/update_task_usecase.dart';
-import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
+import 'package:vedem/features/tasks/domain/repository/tasks_repository.dart';
+import 'package:vedem/features/tasks/presentation/cubit/tasks_cubit.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -55,47 +48,10 @@ Future<void> initDependencies() async {
 }
 
 Future<void> _initTasks() async {
-  serviceLocator.registerFactory(
-    () => TasksBloc(
-      createNewTaskUseCase: serviceLocator(),
-      initializeTasksForDayUseCase: serviceLocator(),
-      readTasksForDayUseCase: serviceLocator(),
-      readTasksForMonthUseCase: serviceLocator(),
-      updateTaskUseCase: serviceLocator(),
-      deleteTaskUseCase: serviceLocator(),
-      setTaskUseCase: serviceLocator(),
-    ),
-  );
-
-  // Usecases
-  serviceLocator.registerLazySingleton(
-    () => CreateNewTaskUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => InitializeTasksForDayUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => ReadTasksForDayUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => ReadTasksForMonthUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => UpdateTaskUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => DeleteTaskUseCase(taskRepository: serviceLocator()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => SetTaskUseCase(taskRepository: serviceLocator()),
-  );
-
-  // Repository
-  serviceLocator.registerLazySingleton<TaskRepository>(
+  serviceLocator.registerFactory(() => TasksCubit(serviceLocator()));
+  serviceLocator.registerLazySingleton<TasksRepository>(
     () => TaskRepositoryImpl(dataSource: serviceLocator()),
   );
-
-  // Data sources
   serviceLocator.registerLazySingleton<TaskDataSource>(
     () => TaskLocalDataSource(db: serviceLocator()),
   );

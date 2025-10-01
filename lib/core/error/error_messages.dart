@@ -10,6 +10,5 @@ const String loadHighlightsError = 'Error while loading highlights';
 const String saveHighlightError = 'Error while saving this highlight';
 const String imageProcessingError = 'Error while processing the image';
 
-const String noOperationWhileIsLoadingError =
-    'Error: first wait for the current action to finish, then try again';
+const String noOperationWhileIsLoadingError = 'Error: Something went wrong!';
 const String genericError = 'Error: Something went wrong!';

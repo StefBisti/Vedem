@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:vedem/core/style/app_colors.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 
-// Cancel or Create task
-class CreateTaskDecisionButtons extends StatelessWidget {
-  final Function() onCancel, onAccept;
-  final bool createHidden;
-  final String createText;
-  final IconData createIcon;
+class TaskDecisionButtons extends StatelessWidget {
+  final bool enabled;
+  final String decisionButtonText;
+  final IconData decisionButtonIcon;
+  final Function() onDecisionButtonPressed;
+  final Function() onCancelButtonPressed;
 
-  const CreateTaskDecisionButtons({
+  const TaskDecisionButtons({
     super.key,
-    required this.createHidden,
-    required this.onCancel,
-    required this.onAccept,
-    required this.createIcon,
-    required this.createText,
+    required this.enabled,
+    required this.decisionButtonText,
+    required this.decisionButtonIcon,
+    required this.onDecisionButtonPressed,
+    required this.onCancelButtonPressed,
   });
 
   @override
@@ -24,7 +24,7 @@ class CreateTaskDecisionButtons extends StatelessWidget {
       children: [
         Expanded(
           child: TextButton.icon(
-            onPressed: onCancel,
+            onPressed: onCancelButtonPressed,
             label: Text(
               'Cancel',
               style: AppTextStyles.content.copyWith(
@@ -37,9 +37,10 @@ class CreateTaskDecisionButtons extends StatelessWidget {
               color: AppColors.primaryLightTextColor,
             ),
             style: TextButton.styleFrom(
+              overlayColor: AppColors.primaryLightTextColor,
               side: BorderSide(
                 color: AppColors.primaryLightTextColor,
-                width: 1.0,
+                width: 1.5,
               ),
             ),
           ),
@@ -47,21 +48,22 @@ class CreateTaskDecisionButtons extends StatelessWidget {
         SizedBox(width: 16.0),
         Expanded(
           child: TextButton.icon(
-            onPressed: onAccept,
+            onPressed: onDecisionButtonPressed,
             label: Text(
-              createText,
+              decisionButtonText,
               style: AppTextStyles.content.copyWith(
                 color: AppColors.primaryDarkTextColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
             icon: Icon(
-              createIcon,
+              decisionButtonIcon,
               size: 20.0,
               color: AppColors.primaryDarkTextColor,
             ),
             style: TextButton.styleFrom(
-              backgroundColor: !createHidden
+              overlayColor: AppColors.primaryDarkTextColor,
+              backgroundColor: enabled
                   ? AppColors.lightBackgroundColor
                   : AppColors.secondaryLightTextColor,
             ),

@@ -3,21 +3,21 @@ import 'package:vedem/core/style/app_colors.dart';
 import 'package:vedem/core/style/app_style.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 
-class CreateTaskCategorySelector extends StatelessWidget {
-  const CreateTaskCategorySelector({
+class TaskFilterSelector extends StatelessWidget {
+  final List<String> labels;
+  final List<Color> colors;
+  final List<IconData> icons;
+  final int selectedIndex;
+  final Function(int) onSelected;
+
+  const TaskFilterSelector({
     super.key,
-    required this.categoriesNames,
-    required this.categoriesColors,
-    required this.categoriesIcons,
-    required this.selectedCategoryIndex,
+    required this.labels,
+    required this.colors,
+    required this.icons,
+    required this.selectedIndex,
     required this.onSelected,
   });
-
-  final List<String> categoriesNames;
-  final List<Color> categoriesColors;
-  final List<IconData> categoriesIcons;
-  final int selectedCategoryIndex;
-  final Function(int) onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -25,24 +25,24 @@ class CreateTaskCategorySelector extends StatelessWidget {
       spacing: 8.0,
       runSpacing: 2.0,
       children: [
-        for (int i = 0; i < categoriesNames.length; i++)
+        for (int i = 0; i < labels.length; i++)
           TextButton.icon(
             onPressed: () => onSelected(i),
             label: Text(
-              categoriesNames[i],
+              labels[i],
               style: AppTextStyles.content.copyWith(
-                color: selectedCategoryIndex == i
-                    ? categoriesColors[i]
-                    : (selectedCategoryIndex == -1
+                color: selectedIndex == i
+                    ? colors[i]
+                    : (selectedIndex == -1
                           ? AppColors.primaryLightTextColor
                           : AppColors.secondaryLightTextColor),
               ),
             ),
             icon: Icon(
-              categoriesIcons[i],
-              color: selectedCategoryIndex == i
-                  ? categoriesColors[i]
-                  : (selectedCategoryIndex == -1
+              icons[i],
+              color: selectedIndex == i
+                  ? colors[i]
+                  : (selectedIndex == -1
                         ? AppColors.primaryLightTextColor
                         : AppColors.secondaryLightTextColor),
             ),
@@ -53,11 +53,13 @@ class CreateTaskCategorySelector extends StatelessWidget {
                   AppStyle.roundedCorners,
                 ),
                 side: BorderSide(
-                  color: selectedCategoryIndex == i ? categoriesColors[i] : Colors.black,
+                  color: selectedIndex == i
+                      ? colors[i]
+                      : Colors.black,
                   width: 1.0,
                 ),
               ),
-              overlayColor: categoriesColors[i],
+              overlayColor: colors[i],
             ),
           ),
       ],

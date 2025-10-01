@@ -2,79 +2,119 @@ import 'package:fpdart/fpdart.dart';
 import 'package:vedem/core/error/exceptions.dart';
 import 'package:vedem/core/error/failures.dart';
 import 'package:vedem/features/tasks/data/datasources/task_data_source.dart';
-import 'package:vedem/features/tasks/data/models/task_model.dart';
+import 'package:vedem/features/tasks/data/models/day_task_entry_model.dart';
+import 'package:vedem/features/tasks/data/models/task_entry_model.dart';
+import 'package:vedem/features/tasks/data/models/user_task_model.dart';
+import 'package:vedem/features/tasks/domain/entities/subtask_entity.dart';
+import 'package:vedem/features/tasks/domain/entities/task_done_type.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
-import 'package:vedem/features/tasks/domain/repositories/task_repository.dart';
+import 'package:vedem/features/tasks/domain/entities/task_filter_type.dart';
+import 'package:vedem/features/tasks/domain/repository/tasks_repository.dart';
 
-class TaskRepositoryImpl implements TaskRepository {
+class TaskRepositoryImpl implements TasksRepository {
   final TaskDataSource dataSource;
 
   const TaskRepositoryImpl({required this.dataSource});
 
   @override
-  Future<Either<Failure, TaskEntity>> createNewTaskAndAssignToDay(
+  Future<Either<Failure, List<TaskEntity>>> getTasksForDay(
     String dayId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
+    bool alsoInitialize,
   ) async {
     try {
-      TaskModel newTask = await dataSource.addNewTaskAndAssignToDay(
+      if (alsoInitialize) {
+        List<UserTaskModel> initializationTasks = await dataSource
+            .readDailyOrNotDoneUserTasksFromDay(dayId);
+
+        List<DayTaskEntryModel> initializationDayTasks = initializationTasks
+            .map(
+              (t) => t.dayTaskEntryModel.copyWith(
+                isSecondChance: t.taskEntryModel.isDailyTask == 1 ? 0 : 1,
+              ),
+            )
+            .toList();
+        await dataSource.writeDayTaskEntries(initializationDayTasks);
+      }
+      final List<UserTaskModel> result = await dataSource.readUserTasksByDay(
         dayId,
-        categoryId,
-        content,
-        isRecurring,
-        diamonds,
       );
-      return right(newTask.toEntity());
+      return right(result.map((t) => t.toEntity()).toList());
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> readTasksForDay(
+  Future<Either<Failure, List<TaskEntity>>> getFilteredTasks(
+    TaskFilterType filterType,
+  ) async {
+    try {
+      late List<TaskEntryModel> filteredTasks;
+      if (filterType == TaskFilterType.none) {
+        filteredTasks = await dataSource.readAllTaskEntries();
+      }
+      if (filterType == TaskFilterType.byStarred) {
+        filteredTasks = await dataSource.readStarredTaskEntries();
+      }
+      if (filterType == TaskFilterType.byTrashed) {
+        filteredTasks = await dataSource.readTrashedTaskEntries();
+      } else {
+        filteredTasks = await dataSource.readTaskEntriesByCategoryId(
+          filterType.index - TaskFilterType.byCategory0.index,
+        );
+      }
+      return right(filteredTasks.map((t) => t.toEntity()).toList());
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TaskEntity>> addNewTask(
     String dayId,
+    TaskEntity dirtyTask,
   ) async {
     try {
-      final List<TaskModel> result = await dataSource.readTasksForDay(dayId);
-      return right(result.map((t) => t.toEntity()).toList());
+      TaskEntryModel? overlappingTask = await dataSource
+          .readTaskEntryWithContent(dirtyTask.content);
+      if (overlappingTask != null) {
+        TaskEntryModel newTaskEntry = TaskEntryModel.fromEntity(
+          dirtyTask,
+        ).copyWith(taskId: overlappingTask.taskId);
+        await dataSource.updateTaskEntry(newTaskEntry);
+
+        DayTaskEntryModel newDayTaskEntry = DayTaskEntryModel.fromEntity(
+          dirtyTask,
+        ).copyWith(taskId: overlappingTask.taskId, dayId: dayId);
+        await dataSource.writeDayTaskEntry(newDayTaskEntry);
+        return right(
+          UserTaskModel(
+            taskEntryModel: newTaskEntry,
+            dayTaskEntryModel: newDayTaskEntry,
+          ).toEntity(),
+        );
+      } else {
+        TaskEntryModel newTaskEntry = TaskEntryModel.fromEntity(dirtyTask);
+        DayTaskEntryModel newDayTaskEntry = DayTaskEntryModel.fromEntity(
+          dirtyTask,
+        ).copyWith(dayId: dayId);
+        final UserTaskModel result = await dataSource.writeTaskWithDayTask(
+          newTaskEntry,
+          newDayTaskEntry,
+        );
+        return right(result.toEntity());
+      }
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> readTasksForMonth(
-    String monthId,
-  ) async {
+  Future<Either<Failure, Unit>> updateTaskForDay(TaskEntity newTask) async {
     try {
-      final List<TaskModel> result = await dataSource.readTasksForMonth(
-        monthId,
-      );
-      return right(result.map((t) => t.toEntity()).toList());
-    } on LocalDatabaseException catch (e) {
-      return left(LocalDatabaseFailure(e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> updateTask(
-    int taskId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
-  ) async {
-    try {
-      await dataSource.updateGenericTask(
-        taskId,
-        categoryId,
-        content,
-        isRecurring,
-        diamonds,
-      );
+      TaskEntryModel newTaskEntry = TaskEntryModel.fromEntity(newTask);
+      DayTaskEntryModel newDayTaskEntry = DayTaskEntryModel.fromEntity(newTask);
+      await dataSource.updateTaskAndDayTaskEntry(newTaskEntry, newDayTaskEntry);
       return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
@@ -82,57 +122,65 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> setTask(
-    String dayId,
-    int taskId,
+  Future<Either<Failure, Unit>> updateTask(TaskEntity newTask) async {
+    try {
+      TaskEntryModel newTaskEntry = TaskEntryModel.fromEntity(newTask);
+      await dataSource.updateTaskEntry(newTaskEntry);
+      return right(unit);
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteTaskForDay(int dayTaskId) async {
+    try {
+      await dataSource.deleteDayTaskEntry(dayTaskId);
+      return right(unit);
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteTask(int taskId) async {
+    try {
+      await dataSource.deleteTaskEntryRecursively(taskId);
+      return right(unit);
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> toggleTask(
+    int dayTaskId,
+    TaskDoneType doneType,
+  ) async {
+    try {
+      await dataSource.setDayTaskDoneType(dayTaskId, doneType.index);
+      return right(unit);
+    } on LocalDatabaseException catch (e) {
+      return left(LocalDatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> toggleSubtask(
+    TaskEntity currentTask,
+    int subtaskIndex,
     bool done,
   ) async {
     try {
-      await dataSource.updateDayTaskConnection(dayId, taskId, done);
-      return right(unit);
-    } on LocalDatabaseException catch (e) {
-      return left(LocalDatabaseFailure(e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> deleteTask(
-    String? dayId,
-    int taskId,
-    bool isRecurring,
-  ) async {
-    try {
-      if (dayId == null) {
-        await dataSource.deleteTaskCompletely(taskId);
-      } else if (isRecurring == false) {
-        await dataSource.deleteDayTaskConnection(dayId, taskId);
-      } else {
-        await dataSource.deleteDayTaskConnectionAndSetTaskNotRecurring(
-          dayId,
-          taskId,
-        );
-      }
-
-      return right(unit);
-    } on LocalDatabaseException catch (e) {
-      return left(LocalDatabaseFailure(e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<TaskEntity>>> initializeTasksForDay(
-    String dayId,
-  ) async {
-    try {
-      final List<TaskModel> result = await dataSource
-          .getDefaultTasksNotAssignedToDay(dayId);
-      await Future.wait(
-        result.map(
-          (task) =>
-              dataSource.addNewDayTaskConnection(dayId, task.taskId, false),
-        ),
+      List<SubtaskEntity> newSubtasks = List.from(currentTask.subtasks);
+      newSubtasks[subtaskIndex] = newSubtasks[subtaskIndex].copyWith(
+        completed: done,
       );
-      return right(result.map((t) => t.toEntity()).toList());
+      await dataSource.setDayTaskNewSubtaskEcoding(
+        currentTask.dayTaskId!,
+        SubtaskEntity.encodeSubtasks(newSubtasks),
+      );
+      return right(unit);
     } on LocalDatabaseException catch (e) {
       return left(LocalDatabaseFailure(e.message));
     }

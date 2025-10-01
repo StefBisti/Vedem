@@ -1,62 +1,56 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vedem/core/pages/create_task_page.dart';
+import 'package:vedem/core/pages/update_task_page.dart';
 import 'package:vedem/core/style/app_colors.dart';
 import 'package:vedem/core/style/app_style.dart';
 import 'package:vedem/core/style/app_text_styles.dart';
 import 'package:vedem/core/utils/misc_utils.dart';
+import 'package:vedem/features/tasks/domain/entities/task_done_type.dart';
 import 'package:vedem/features/tasks/domain/entities/task_entity.dart';
-import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
-import 'package:vedem/features/tasks/presentation/private/task_widget.dart';
+import 'package:vedem/features/tasks/presentation/cubit/tasks_cubit.dart';
+import 'package:vedem/features/tasks/presentation/private/task/task_widget.dart';
 import 'package:animations/animations.dart';
 
-class DayTasksDisplay extends StatefulWidget {
+class DayTasksDisplay extends StatelessWidget {
   final String dayId;
 
-  const DayTasksDisplay({super.key, required this.dayId});
+  DayTasksDisplay({super.key, required this.dayId});
 
-  @override
-  State<DayTasksDisplay> createState() => _DayTasksDisplayState();
-}
-
-class _DayTasksDisplayState extends State<DayTasksDisplay> {
-  final categoryColors = const [
-    Colors.green,
-    Colors.blue,
-    Colors.red,
-    Colors.amber,
-    Colors.black,
+  final categoryPrimaryColors = const [
+    AppColors.primaryColor1,
+    AppColors.primaryColor2,
+    AppColors.primaryColor0,
+    AppColors.primaryColor3,
   ];
-
-  late TextEditingController dayController, monthController;
-
-  @override
-  void initState() {
-    super.initState();
-    dayController = TextEditingController();
-    monthController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    dayController.dispose();
-    monthController.dispose();
-    super.dispose();
-  }
+  final categorySecondaryColors = [
+    AppColors.secondaryColor1Light,
+    AppColors.secondaryColor2Light,
+    AppColors.secondaryColor0Light,
+    AppColors.secondaryColor3Light,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TasksBloc, TasksState>(
-      listener: (context, state) {
+    return BlocConsumer<TasksCubit, TasksState>(
+      listener: (ctx, state) {
         if (state.error != null) {
           MiscUtils.showSnackBar(context, state.error!);
         }
       },
-      builder: (context, state) {
-        bool anyTasksDone = state.tasks.any((t) => t.isDone == true);
-        bool anyTasksUnone = state.tasks.any((t) => t.isDone == false);
+      builder: (ctx, state) {
+        bool anyTasksDone = state.tasks.any(
+          (t) => t.taskDoneType != TaskDoneType.notDone,
+        );
+        bool anyTasksNotDone = state.tasks.any(
+          (t) => t.taskDoneType == TaskDoneType.notDone,
+        );
         return Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
+          padding: EdgeInsetsGeometry.symmetric(
+            horizontal: AppStyle.pageHorizontalPadding,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8.0,
@@ -65,18 +59,6 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text('Tasks left today', style: AppTextStyles.heading),
-                  SizedBox(width: 16.0),
-                  if (state.isLoading)
-                    CircularProgressIndicator(
-                      constraints: BoxConstraints(
-                        minWidth: 15.0,
-                        maxWidth: 15.0,
-                        minHeight: 15.0,
-                        maxHeight: 15.0,
-                      ),
-                      color: AppColors.primaryDarkTextColor,
-                      strokeWidth: 3.0,
-                    ),
                   Spacer(),
                   OpenContainer(
                     closedElevation: 0,
@@ -119,10 +101,10 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
                         ),
                       );
                     },
-                    openBuilder: (context, _) {
+                    openBuilder: (_, _) {
                       return CreateTaskPage(
-                        dayId: widget.dayId,
-                        tasksBloc: this.context.read<TasksBloc>(),
+                        dayId: dayId,
+                        tasksBloc: ctx.read<TasksCubit>(),
                       );
                     },
                   ),
@@ -130,16 +112,12 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
               ),
 
               for (TaskEntity task in state.tasks)
-                if (task.isDone == false)
-                  TaskWidget(
-                    key: ValueKey(task.taskId),
-                    dayId: widget.dayId,
-                    task: task,
-                    categoryColors: categoryColors,
-                  ),
-              if (anyTasksUnone == false && anyTasksDone == true)
+                if (task.taskDoneType == TaskDoneType.notDone)
+                  _getTaskWidget(task, context),
+
+              if (anyTasksNotDone == false && anyTasksDone == true)
                 Text('No tasks left! Well done!', style: AppTextStyles.content),
-              if (anyTasksUnone == false && anyTasksDone == false)
+              if (anyTasksNotDone == false && anyTasksDone == false)
                 Text(
                   'No tasks for today. Add some',
                   style: AppTextStyles.content,
@@ -149,54 +127,50 @@ class _DayTasksDisplayState extends State<DayTasksDisplay> {
                 SizedBox(height: 20.0),
                 Text('Tasks done today', style: AppTextStyles.heading),
                 for (TaskEntity task in state.tasks)
-                  if (task.isDone == true)
-                    TaskWidget(
-                      key: ValueKey(task.taskId),
-                      dayId: widget.dayId,
-                      task: task,
-                      categoryColors: categoryColors,
-                    ),
+                  if (task.taskDoneType != TaskDoneType.notDone)
+                    _getTaskWidget(task, context),
               ],
-
-              // Create new task part
-              SizedBox(height: 20.0),
-
-              // Initialize day part
-              TextButton.icon(
-                onPressed: () {
-                  context.read<TasksBloc>().add(
-                    InitializeTasksForDayEvent(dayId: widget.dayId),
-                  );
-                },
-                label: Text(
-                  'Initialize day with tasks',
-                  style: AppTextStyles.content.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryLightTextColor,
-                  ),
-                ),
-                icon: Icon(
-                  Icons.auto_awesome_rounded,
-                  color: AppColors.primaryLightTextColor,
-                  size: 20.0,
-                ),
-                style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(
-                      AppStyle.roundedCorners,
-                    ),
-                  ),
-                  backgroundColor: AppColors.darkBackgroundColor,
-                ),
-              ),
-
-              SizedBox(height: 32.0),
-
-              
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _getTaskWidget(TaskEntity task, BuildContext context) {
+    return TaskWidget(
+      key: ValueKey(task.taskId),
+      task: task,
+      categoryPrimaryColor:
+          categoryPrimaryColors[min(
+            task.categoryId,
+            categoryPrimaryColors.length - 1,
+          )],
+      categorySecondaryColor:
+          categorySecondaryColors[min(
+            task.categoryId,
+            categoryPrimaryColors.length - 1,
+          )],
+      onEdit: () {
+        UpdateTaskPage.route(context, task.taskId, context.read<TasksCubit>());
+      },
+      onDelete: () {
+        context.read<TasksCubit>().deleteTask(task.taskId);
+      },
+      onTaskToggled: (doneType) {
+        context.read<TasksCubit>().toggleTask(task.dayTaskId!, doneType);
+      },
+      onSubstaskToggled: (index, completed) {
+        context.read<TasksCubit>().toggleSubtask(
+          task.dayTaskId!,
+          index,
+          completed,
+        );
+      },
+      onClaimDiamonds: (diamonds) {
+        // TODO
+      },
+      onTaskPressed: null,
     );
   }
 }

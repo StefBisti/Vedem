@@ -11,61 +11,53 @@ import 'package:vedem/features/highlights/presentation/cubit/highlights_cubit.da
 import 'package:vedem/features/highlights/presentation/public/highlight_header_display.dart';
 import 'package:vedem/features/rich_inputs/presentation/cubit/rich_inputs_cubit.dart';
 import 'package:vedem/features/rich_inputs/presentation/public/rich_input_display.dart';
-import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
+import 'package:vedem/features/tasks/presentation/cubit/tasks_cubit.dart';
 import 'package:vedem/features/tasks/presentation/public/day_tasks_display.dart';
 
 class DayPage extends StatelessWidget {
   final String dayId;
-  final HighlightsCubit highlightsCubit;
-  final DaysCubit daysCubit;
+  // final HighlightsCubit highlightsCubit;
+  // final DaysCubit daysCubit;
 
   const DayPage({
     super.key,
     required this.dayId,
-    required this.highlightsCubit,
-    required this.daysCubit,
+    // required this.highlightsCubit,
+    // required this.daysCubit,
   });
 
-  static void route(BuildContext context, String dayId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DayPage(
-          dayId: dayId,
-          highlightsCubit: context.read<HighlightsCubit>(),
-          daysCubit: context.read<DaysCubit>(),
-        ),
-      ),
-    );
-  }
+  // static void route(BuildContext context, String dayId) {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => DayPage(
+  //         dayId: dayId,
+  //         highlightsCubit: context.read<HighlightsCubit>(),
+  //         daysCubit: context.read<DaysCubit>(),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    bool alsoInitializeDay =
-        daysCubit.state.days
-            .firstWhere(
-              (d) => d.dayId == dayId,
-              orElse: () => DayEntity(dayId: '1e2'),
-            )
-            .isInitialized ==
-        false;
+    // bool alsoInitializeDay =
+    //     daysCubit.state.days
+    //         .firstWhere(
+    //           (d) => d.dayId == dayId,
+    //           orElse: () => DayEntity(dayId: '1e2'),
+    //         )
+    //         .isInitialized ==
+    //     false;
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => GetIt.instance<TasksBloc>()
-            ..add(
-              ReadTasksForDayEvent(
-                dayId: dayId,
-                alsoInitialize: alsoInitializeDay,
-              ),
-            ),
-        ),
-        BlocProvider(
-          create: (_) =>
-              GetIt.instance<RichInputsCubit>()..loadRichInput(dayId),
-        ),
-        BlocProvider.value(value: highlightsCubit),
-        BlocProvider.value(value: daysCubit),
+        BlocProvider(create: (_) => GetIt.instance<TasksCubit>()),
+        // BlocProvider(
+        //   create: (_) =>
+        //       GetIt.instance<RichInputsCubit>()..loadRichInput(dayId),
+        // ),
+        // BlocProvider.value(value: highlightsCubit),
+        // BlocProvider.value(value: daysCubit),
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -81,18 +73,19 @@ class DayPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              HighlightHeaderDisplay(
-                dayId: dayId,
-                shareWidget: DayShareButtonDisplay(dayId: dayId),
-                heartWidget: DayHeartButtonDisplay(dayId: dayId),
-              ),
-              const SizedBox(height: 16.0),
-              DayHeaderDisplay(dayId: dayId),
-              const SizedBox(height: 32.0),
+              SizedBox(height: 50,),
+              // HighlightHeaderDisplay(
+              //   dayId: dayId,
+              //   shareWidget: DayShareButtonDisplay(dayId: dayId),
+              //   heartWidget: DayHeartButtonDisplay(dayId: dayId),
+              // ),
+              // const SizedBox(height: 16.0),
+              // DayHeaderDisplay(dayId: dayId),
+              // const SizedBox(height: 32.0),
               DayTasksDisplay(dayId: dayId),
-              const SizedBox(height: 16.0),
-              RichInputDisplay(richInputKey: dayId),
-              const SizedBox(height: 32.0),
+              // const SizedBox(height: 16.0),
+              // RichInputDisplay(richInputKey: dayId),
+              // const SizedBox(height: 32.0),
             ],
           ),
         ),

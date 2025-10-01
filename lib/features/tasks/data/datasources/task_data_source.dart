@@ -1,35 +1,35 @@
-import 'package:vedem/features/tasks/data/models/task_model.dart';
+import 'package:vedem/features/tasks/data/models/day_task_entry_model.dart';
+import 'package:vedem/features/tasks/data/models/task_entry_model.dart';
+import 'package:vedem/features/tasks/data/models/user_task_model.dart';
 
 abstract interface class TaskDataSource {
-  Future<TaskModel> addNewTaskAndAssignToDay(
-    String dayId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
+  Future<List<UserTaskModel>> readUserTasksByDay(String dayId);
+  Future<List<UserTaskModel>> readDailyOrNotDoneUserTasksFromDay(String dayId);
+  Future<List<TaskEntryModel>> readAllTaskEntries();
+  Future<List<TaskEntryModel>> readStarredTaskEntries();
+  Future<List<TaskEntryModel>> readTrashedTaskEntries();
+  Future<List<TaskEntryModel>> readTaskEntriesByCategoryId(int categoryId);
+  Future<TaskEntryModel?> readTaskEntryWithContent(String content);
+
+  Future<UserTaskModel> writeTaskWithDayTask(
+    TaskEntryModel taskEntry,
+    DayTaskEntryModel dayTaskEntry,
+  );
+  Future<void> writeDayTaskEntry(DayTaskEntryModel dayTaskEntry);
+  Future<void> writeDayTaskEntries(List<DayTaskEntryModel> dayTaskEntries);
+
+  Future<void> updateTaskEntry(TaskEntryModel taskEntry);
+  Future<void> updateDayTaskEntry(DayTaskEntryModel dayTaskEntry);
+  Future<void> updateTaskAndDayTaskEntry(
+    TaskEntryModel taskEntry,
+    DayTaskEntryModel dayTaskEntry,
+  );
+  Future<void> setDayTaskDoneType(int dayTaskId, int doneType);
+  Future<void> setDayTaskNewSubtaskEcoding(
+    int dayTaskId,
+    String newSubtaskEncoding,
   );
 
-  Future<void> addNewDayTaskConnection(String dayId, int taskId, bool done);
-
-  Future<List<TaskModel>> readTasksForDay(String dayId);
-
-  Future<List<TaskModel>> readTasksForMonth(String monthId);
-
-  Future<List<TaskModel>> getDefaultTasksNotAssignedToDay(String dayId);
-
-  Future<void> updateGenericTask(
-    int taskId,
-    int categoryId,
-    String content,
-    bool isRecurring,
-    int diamonds,
-  );
-
-  Future<void> updateDayTaskConnection(String dayId, int taskId, bool done);
-
-  Future<void> deleteTaskCompletely(int taskId);
-
-  Future<void> deleteDayTaskConnection(String dayId, int taskId);
-
-  Future<void> deleteDayTaskConnectionAndSetTaskNotRecurring(String dayId, int taskId);
+  Future<void> deleteTaskEntryRecursively(int taskId);
+  Future<void> deleteDayTaskEntry(int dayTaskId);
 }

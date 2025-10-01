@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class CreateTaskGradient extends StatelessWidget {
-  const CreateTaskGradient({super.key, required this.color});
-
+class TaskGradient extends StatelessWidget {
   final Color color;
+
+  const TaskGradient({super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {

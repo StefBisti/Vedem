@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:vedem/core/pages/month_page.dart';
+import 'package:vedem/core/pages/day_page.dart';
 import 'package:vedem/core/style/app_themes.dart';
 import 'package:vedem/core/utils/time_utils.dart';
 import 'package:vedem/init_dependencies.dart';
 
 void main() async {
+  //debugPaintSizeEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
   await initDependencies();
   await serviceLocator.allReady(timeout: Duration(seconds: 3));
@@ -49,7 +51,7 @@ class _MainState extends State<Main> {
       debugShowCheckedModeBanner: false,
       title: 'Vedem',
       theme: AppThemes.lightTheme,
-      home: MonthPage(monthId: TimeUtils.thisMonthId),
+      home: DayPage(dayId: TimeUtils.thisDayId),
     );
   }
 }

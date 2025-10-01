@@ -1,16 +1,22 @@
-class TasksKeys {
-  static const String table = 'tasks';
-  static const String id = 'task_id';
-  static const String categoryId = 'category_id';
-  static const String content = 'content';
-  static const String isRecurring = 'is_recurring';
-  static const String diamonds = 'diamonds';
-}
+const String tasksTableKey = 'tasks';
+const String taskIdKey = 'task_id';
+const String taskCategoryIdKey = 'task_category_id';
+const String taskContentKey = 'task_content';
+const String taskIsStarredKey = 'task_is_starred';
+const String taskIsDailyKey = 'task_is_daily';
 
-class DayTasksKeys {
-  static const String table = 'day_tasks';
-  static const String id = 'day_task_id';
-  static const String day = 'day_id';
-  static const String task = 'task_id';
-  static const String done = 'done';
-}
+const String dayTasksTableKey = 'day_tasks';
+const String dayTaskIdKey = 'day_task_id';
+const String dayTaskDayIdKey = 'day_id';
+const String dayTaskTaskIdKey = 'task_id';
+const String dayTaskDoneTypeKey = 'done_type';
+const String dayTaskIsSecondChanceKey = 'is_second_chance';
+const String dayTaskEncodedSubtasksKey = 'day_task_encoded_subtasks';
+const String dayTaskImportanceKey = 'day_task_importance';
+const String dayTaskEffortRequiredKey = 'day_task_effort_required';
+const String dayTaskTimeRequiredKey = 'day_task_time_required';
+const String dayTaskNotGreatDiamondsKey = 'day_task_not_great_diamonds';
+const String dayTaskOnPointDiamondsKey = 'day_task_on_point_diamonds';
+const String dayTaskAwesomeDiamondsKey = 'day_task_awesome_diamonds';
+const String dayTaskDueTimeInMinutesKey = 'day_task_due_time_in_minutes';
+const String dayTaskNotifyTimeInMinutesKey = 'day_task_notify_time_in_minutes';

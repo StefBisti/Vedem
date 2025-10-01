@@ -1,46 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vedem/core/style/app_colors.dart';
-import 'package:vedem/features/tasks/presentation/bloc/tasks_bloc.dart';
+import 'package:vedem/features/tasks/presentation/cubit/tasks_cubit.dart';
 import 'package:vedem/features/tasks/presentation/public/update_task_display.dart';
 
 class UpdateTaskPage extends StatelessWidget {
   final int taskId;
-  final String previousContent;
-  final int previouslySelectedCategoryIndex;
-  final bool previouslyIsRecurring;
-  final int previousDiamonds;
-  final TasksBloc bloc;
+  final TasksCubit tasksCubit;
 
   const UpdateTaskPage({
     super.key,
     required this.taskId,
-    required this.bloc,
-    required this.previousContent,
-    required this.previouslySelectedCategoryIndex,
-    required this.previouslyIsRecurring,
-    required this.previousDiamonds,
+    required this.tasksCubit,
   });
 
-  static void route(
-    BuildContext context,
-    TasksBloc bloc,
-    int taskId,
-    String previousContent,
-    int previouslySelectedCategoryIndex,
-    bool previouslyIsRecurring,
-    int previousDiamonds,
-  ) {
+  static void route(BuildContext context, int taskId, TasksCubit tasksCubit) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UpdateTaskPage(
-          taskId: taskId,
-          previousContent: previousContent,
-          previousDiamonds: previousDiamonds,
-          previouslyIsRecurring: previouslyIsRecurring,
-          previouslySelectedCategoryIndex: previouslySelectedCategoryIndex,
-          bloc: bloc,
-        ),
+        builder: (_) => UpdateTaskPage(taskId: taskId, tasksCubit: tasksCubit),
       ),
     );
   }
@@ -48,7 +25,7 @@ class UpdateTaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: bloc,
+      value: tasksCubit,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 0.0,
@@ -58,13 +35,7 @@ class UpdateTaskPage extends StatelessWidget {
         ),
         backgroundColor: AppColors.darkBackgroundColor,
         extendBodyBehindAppBar: true,
-        body: UpdateTaskDisplay(
-          taskId: taskId,
-          previousContent: previousContent,
-          previousDiamonds: previousDiamonds,
-          previouslyIsRecurring: previouslyIsRecurring,
-          previouslySelectedCategoryIndex: previouslySelectedCategoryIndex,
-        ),
+        body: UpdateTaskDisplay(taskId: taskId),
       ),
     );
   }
